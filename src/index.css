@@ -1,19 +1,35 @@
 html,
-body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
+body,
+#root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 #root {
-  margin: 0;
-  padding: 0;
   display: flex;
   flex-flow: column;
+}
+
+#root .content {
+  display: flex;
+  flex-flow: column;
+  overflow: auto;
   height: 100%;
 }
 
-main {
-  flex: 1 1 auto;
+#root .content .scrollable {
+  display: flex;
   overflow: auto;
+  flex-flow: column;
+}
+
+#root .content .scrollable .p-datatable {
+  display: flex;
+  overflow: auto;
+}
+
+#root .content .scrollable .p-datatable .p-datatable-wrapper {
+  flex: 1 1 auto;
+  overflow-y: scroll;
 }

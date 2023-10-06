@@ -9,14 +9,18 @@ export default function Header() {
 
     const items = [
         {
-            label: "Home",
             icon: "pi pi-fw pi-home",
             command: () => navigate({ to: "/", replace: true })
         },
         {
-            label: "Componentes",
+            label: "Pedidos",
             icon: "pi pi-fw pi-money-bill",
-            command: () => navigate({ to: "/componentes", replace: true })
+            command: () => navigate({ to: "/pedidos", replace: true })
+        },
+        {
+            label: "Agenda",
+            icon: "pi pi-fw pi-calendar",
+            command: () => navigate({ to: "/agenda", replace: true })
         }
     ];
 

@@ -7,6 +7,7 @@ import { PrimeReactProvider, PrimeReactContext } from 'primereact/api';
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
+import "../node_modules/primeflex/primeflex.css";
 /****************PrimeReact*****************/
 
 /*ReactDOM.createRoot(document.getElementById('root')).render(
@@ -18,9 +19,7 @@ import 'primeicons/primeicons.css';
 )*/
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <PrimeReactProvider>
-      <App />
-    </PrimeReactProvider>
-  </React.StrictMode>,
+  <PrimeReactProvider>
+    <App />
+  </PrimeReactProvider>
 );
