@@ -1,10 +1,13 @@
-import Component from '../component/Component';
+import React from "react";
+import { Outlet } from "react-location";
 import './Main.css';
 
 export default function Main() {
-    return(
-        <main>
-            <Component />
-        </main>
+    return (
+        <>
+            <main>
+                <Outlet />
+            </main>
+        </>
     );
-}
+};

@@ -1,16 +1,33 @@
+import React, { useEffect } from 'react'
 import { Menubar } from 'primereact/menubar';
+import { useNavigate } from 'react-location';
 import './Header.css';
 
 export default function Header() {
-    
+
+    const navigate = useNavigate();
+
     const items = [
-        {label: 'Produtos'},
-        {label: 'Componentes de Produtos'}
+        {
+            label: "Home",
+            icon: "pi pi-fw pi-home",
+            command: () => navigate({ to: "/", replace: true })
+        },
+        {
+            label: "Componentes",
+            icon: "pi pi-fw pi-money-bill",
+            command: () => navigate({ to: "/componentes", replace: true })
+        }
     ];
 
-    return(
+    useEffect(() => {
+        console.log("starting Header");
+      });
+    
+
+    return (
         <header>
-            <Menubar model={items}/>
+            <Menubar model={items} />
         </header>
     );
 }
