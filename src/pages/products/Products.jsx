@@ -33,13 +33,18 @@ export default function Products() {
             </div>;
     };
 
+    const sendToForm = e => {
+        console.log(e.data.id);
+        navigate({ to: e.data.id, replace: true })
+    }
+
     return (
         <>
             <div className="content">
                 <Card title="Produtos" className="my-3">
                 <div>
                     <Button label="Novo Pedido" severity="success" icon="pi pi-plus"
-                    onClick={() => navigate({ to: " /produtos/novo", replace: true })} />
+                        onClick={() => navigate({ to: "novo", replace: true })} />
                     <Button label="Abrir" icon="pi pi-eye" className="ml-1" />
                 </div>
                 </Card>
@@ -53,6 +58,7 @@ export default function Products() {
                         selectionMode="single"
                         selection={selected}
                         onSelectionChange={(e) => setSelected(e.value)}
+                        onRowDoubleClick={sendToForm}
                     >
                         <Column header="Nome" field="name" ></Column>
                         <Column header="Criado em" field="created_at" ></Column>
