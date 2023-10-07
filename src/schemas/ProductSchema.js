@@ -8,5 +8,7 @@ export default Yup.object().shape({
     price: Yup.number()
         .default(0.00)
         .positive("O preço deve possuir um valor positivo!")
-        .required("Obrigatório informar preço!")
+        .required("Obrigatório informar preço!"),
+    description: Yup.string().default(""),
+    photo: Yup.string()
 });

@@ -1,5 +1,11 @@
-export const getProducts = async () => {
-    const url = new URL('/v1/products', "http://localhost:9999");
+export const getProducts = async includeDeleted => {
+    const url = new URL('/v1/products', "http://192.168.1.13:9999");
+
+    console.log(includeDeleted);
+
+    if (includeDeleted !== undefined && includeDeleted !== null) {
+        url.searchParams.append("include_deleted", includeDeleted);
+    }
 
     return new Promise((resolve, reject) =>
         fetch(url, { method: "GET" })
@@ -11,7 +17,7 @@ export const getProducts = async () => {
 };
 
 export const getProductsByID = async id => {
-    const url = new URL(`/v1/products/${id}`, "http://localhost:9999");
+    const url = new URL(`/v1/products/${id}`, "http://192.168.1.13:9999");
 
     return new Promise((resolve, reject) =>
         fetch(url, { method: "GET" })
@@ -23,7 +29,7 @@ export const getProductsByID = async id => {
 };
 
 export const saveNewProduct = async payload => {
-    const url = new URL('/v1/products', "http://localhost:9999");
+    const url = new URL('/v1/products', "http://192.168.1.13:9999");
 
     return new Promise((resolve, reject) =>
         resolve(
@@ -35,5 +41,30 @@ export const saveNewProduct = async payload => {
                 }
             ).catch(err => reject(err))
         )
+    );
+};
+
+export const updateProduct = async payload => {
+    const url = new URL(`/v1/products/${payload.id}`, "http://192.168.1.13:9999");
+
+    return new Promise((resolve, reject) =>
+        resolve(
+            fetch(url,
+                {
+                    method: "PUT",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }
+            ).catch(err => reject(err))
+        )
+    );
+};
+
+export const deleteProduct = async id => {
+    const url = new URL(`/v1/products/${id}`, "http://192.168.1.13:9999");
+
+    return new Promise((resolve, reject) =>
+        resolve(fetch(url, { method: "DELETE" })
+            .catch(err => reject(err)))
     );
 };

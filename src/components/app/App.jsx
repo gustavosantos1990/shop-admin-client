@@ -45,9 +45,7 @@ export default function App() {
           element: () => import("../../pages/products/Products").then(module => <module.default />),
           loader: async () => {
             var res = await getProducts();
-            console.log(res);
-            var json = await res.json();
-            console.log(json);
+            var json = res.status === 204 ? [] : await res.json();
             return { products: json };
           }
         },

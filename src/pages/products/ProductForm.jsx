@@ -3,13 +3,14 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
+import { InputTextarea } from 'primereact/inputtextarea';
 import { InputNumber } from 'primereact/inputnumber';
 import { Toast } from "primereact/toast";
 import { Toolbar } from 'primereact/toolbar';
 import { classNames } from 'primereact/utils';
 import { useNavigate, useMatch } from 'react-location';
 import productSchema from "../../schemas/ProductSchema";
-import { saveNewProduct } from "../../services/ProductService";
+import { saveNewProduct, updateProduct } from "../../services/ProductService";
 import { isInvalid } from "../../components/Utils";
 
 export default function ProductForm() {
@@ -37,28 +38,20 @@ export default function ProductForm() {
         }
     }, []);
 
-    /*
-    useEffect(() => {
-        console.log(product);
-        setIsNewRecord(isInvalid(product) || isInvalid(product.product_id))
-    }, [product]);
-    */
-
-    
     useEffect(() => {
         if (isNewRecord === false) {
-            reset(product);
+            reset(Object.assign(product, { description: "" }))
         }
     }, [isNewRecord]);
 
 
     const onSubmit = data => {
-        console.log(data);
-        saveNewProduct(data).then(async res => {
+        const request = isNewRecord ? saveNewProduct : updateProduct;
+        const successMessage = isNewRecord ? "Produto salvo com sucesso." : "Produto atualizado com sucesso."
+        request(data).then(async res => {
             var json = await res.json();
-            console.log(json);
             if (res.ok) {
-                toastRef.current.show({ severity: 'success', summary: 'Successo!', detail: "Produto salvo com sucesso.", life: 3000 });
+                toastRef.current.show({ severity: 'success', summary: 'Successo!', detail: successMessage, life: 3000 });
                 navigate({ to: `/produtos`, replace: true });
             } else {
                 toastRef.current.show({ severity: 'error', summary: 'Erro!', detail: json.message });
@@ -71,24 +64,33 @@ export default function ProductForm() {
         return value && <small className="p-error">{value.message}</small>;
     };
 
-    const rightToolbar = () => <React.Fragment>
+    const start = () => <>
+        <Button
+            type="button"
+            icon="pi pi-arrow-left"
+            onClick={() => navigate({ to: `/produtos`, replace: true })}
+        />
+    </>;
+
+    const end = () => <>
         <Button
             label="Salvar"
             type="submit"
             icon="pi pi-save"
             iconPos="right"
-            className="p-button-success ml-2 mt-2" />
-    </React.Fragment>;
+            className="p-button-success" />
+    </>;
 
     return (
         <>
             <div className="content">
                 <Toast ref={toastRef} />
+                <h2>Cadastro de Produtos</h2>
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    <Toolbar className="p-1 mb-2" right={rightToolbar} />
+                    <Toolbar className="p-1 m-1" start={start} end={end} />
                     <div className="card p-2">
                         <div className="p-fluid grid">
-                            <div className="field col-12 md:col-9">
+                            <div className="field col-12 md:col-6">
                                 <label htmlFor="name" className={classNames({ 'p-error': errors.name })}>Nome*</label>
                                 <Controller
                                     name="name"
@@ -101,6 +103,8 @@ export default function ProductForm() {
                                     )} />
                                 {getFormErrorMessage('name')}
                             </div>
+                        </div>
+                        <div className="p-fluid grid">
                             <div className="field col-6 md:col-3">
                                 <label htmlFor="price" className={classNames({ 'p-error': errors.price })}>Preço*</label>
                                 <Controller
@@ -113,6 +117,20 @@ export default function ProductForm() {
                                             className={classNames({ 'p-invalid': fieldState.error })} />
                                     } />
                                 {getFormErrorMessage('price')}
+                            </div>
+                        </div>
+                        <div className="p-fluid grid">
+                            <div className="field col-12 md:col-6">
+                                <label htmlFor="description" className={classNames({ 'p-error': errors.description })}>Descrição</label>
+                                <Controller
+                                    name="description"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <InputTextarea id={field.name} {...field}
+                                            value={field.value}
+                                            rows={5}
+                                            onChange={e => field.onChange(e.target.value)} />
+                                    )} />
                             </div>
                         </div>
                     </div>
