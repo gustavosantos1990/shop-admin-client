@@ -18,6 +18,11 @@ export default function Header() {
             command: () => navigate({ to: "/pedidos", replace: true })
         },
         {
+            label: "Produtos",
+            icon: "pi pi-fw pi-gift",
+            command: () => navigate({ to: "/produtos", replace: true })
+        },
+        {
             label: "Agenda",
             icon: "pi pi-fw pi-calendar",
             command: () => navigate({ to: "/agenda", replace: true })
@@ -26,8 +31,7 @@ export default function Header() {
 
     useEffect(() => {
         console.log("starting Header");
-      });
-    
+    });
 
     return (
         <header>
