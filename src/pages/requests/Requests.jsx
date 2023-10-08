@@ -6,7 +6,7 @@ import { Column } from 'primereact/column';
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
 import "./Requests.css";
-import { createWhatsAppLink } from "../../components/Utils";
+import { createWhatsAppLink, formatToBRDateTime } from "../../components/Utils";
 
 export default function Requests() {
 
@@ -22,9 +22,7 @@ export default function Requests() {
 
     useEffect(() => {
         console.log("Starting Requests");
-        console.log(initialData[0]);
-        setRequests(initialData[0].content)
-        console.log(requests);
+        setRequests(initialData)
     }, []);
 
     useEffect(() => {
@@ -33,7 +31,7 @@ export default function Requests() {
 
     const itemsColumn = (rowData) => {
         return <div className="flex flex-column align-items-start">
-            {rowData.products && rowData.products.map(product => (
+            {rowData.request_products && rowData.request_products.map(product => (
                 <Tag className="mt-1" key={product.product.id} value={`${product.amount} x ${product.product.name}`} />
             ))}
         </div>;
@@ -91,7 +89,7 @@ export default function Requests() {
                         onSelectionChange={(e) => { console.log(e); setSelected(e.value) }}
                     >
                         <Column header="ID" field="id" ></Column>
-                        <Column header="Data do pedido" field="created_at" ></Column>
+                        <Column header="Data do pedido" body={row => formatToBRDateTime(row.created_at)} ></Column>
                         <Column header="Cliente" field="customer.name" ></Column>
                         <Column header="Telefone" field="customer.phone" ></Column>
                         <Column header="Data de entrega" field="due_date" ></Column>

@@ -1,12 +1,27 @@
 import React, { useEffect } from 'react'
 import './App.css'
 import { Router, ReactLocation, Outlet } from "react-location";
-import { getRequests } from "../../services/ComponentService";
+import { getRequestByID, getRequests } from "../../services/RequestService";
 import Footer from '../footer/Footer'
 import Header from '../header/Header'
 import { getProducts, getProductsByID } from '../../services/ProductService';
 
 export default function App() {
+
+  useEffect(() => {
+    console.log("starting App");
+  });
+
+  const fetchRequest = async id => {
+    if ("novo" === id) return null;
+    var res = await getRequestByID(id)
+    return await res.json();
+  };
+
+  const fetchProducts = async () => {
+    var res = await getProducts()
+    return res.status === 204 ? [] : await res.json();
+  };
 
   const routes = [
     {
@@ -25,15 +40,19 @@ export default function App() {
           element: () => import("../../pages/requests/Requests").then(module => <module.default />),
           loader: async () => {
             var res = await getRequests();
-            console.log(res);
-            var json = await res.json();
-            console.log(json);
+            var json = res.status === 204 ? [] : await res.json();
             return { requests: json };
           }
         },
         {
           path: ":id",
-          element: () => import("../../pages/requests/Requests").then(module => <module.default />)
+          element: () => import("../../pages/requests/RequestForm").then(module => <module.default />),
+          loader: async ({params}) => {
+            return {
+              request: await fetchRequest(params.id),
+              products: await fetchProducts()
+            }
+          }
         }
       ]
     },
@@ -65,11 +84,7 @@ export default function App() {
     }
   ];
 
-  const location = new ReactLocation()
-
-  useEffect(() => {
-    console.log("starting App");
-  });
+  const location = new ReactLocation();
 
   return (
     <Router routes={routes} location={location}>

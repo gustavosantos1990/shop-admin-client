@@ -5,53 +5,57 @@ import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { InputNumber } from 'primereact/inputnumber';
+import { Calendar } from "primereact/calendar";
 import { Toast } from "primereact/toast";
 import { Toolbar } from 'primereact/toolbar';
 import { classNames } from 'primereact/utils';
 import { useNavigate, useMatch } from 'react-location';
-import productSchema from "../../schemas/ProductSchema";
-import { saveNewProduct, updateProduct } from "../../services/ProductService";
+import requestSchema from "../../schemas/RequestSchema";
+import { saveNewRequest, updateRequest } from "../../services/RequestService";
 
-export default function ProductForm() {
+export default function RequestForm() {
 
-    const routeDate = useMatch();
+    const routeData = useMatch();
     const navigate = useNavigate();
     const toastRef = useRef(null);
-    const [isNewRecord] = useState(routeDate.params.id === "novo" || routeDate.params.id === "undefined" || routeDate.params.id === "null");
-    const [product, setProduct] = useState(routeDate.data.product);
+    const [isNewRecord, setIsNewRecord] = useState(routeData.params.id === "novo" || routeData.params.id === "undefined" || routeData.params.id === "null");
+    const [request, setRequest] = useState(routeData.data.request);
+    const [products, setProducts] = useState(routeData.data.products);
 
-    const { control, formState: { errors }, handleSubmit, reset } = useForm(
+    const { control, formState: { errors }, handleSubmit, reset, getValues } = useForm(
         {
-            defaultValues: productSchema.cast(),
+            defaultValues: requestSchema.cast(),
             mode: "onBlur",
-            resolver: yupResolver(productSchema)
+            resolver: yupResolver(requestSchema)
         }
     );
 
     useEffect(() => {
+        console.log(errors);
         if (isNewRecord) {
-            console.log("Starting product form for new product");
+            console.log("Starting request form for new request");
         } else {
-            console.log("Starting product form for existing product");
-            setProduct(product)
+            console.log("Starting request form for existing request");
+            setRequest(request)
         }
     }, []);
 
     useEffect(() => {
+        console.log("starting form")
         if (isNewRecord === false) {
-            reset(Object.assign(product, { description: "" }))
+            reset(request)
         }
     }, [isNewRecord]);
 
 
     const onSubmit = data => {
-        const request = isNewRecord ? saveNewProduct : updateProduct;
+        const request = isNewRecord ? saveNewRequest : updateRequest;
         const successMessage = isNewRecord ? "Produto salvo com sucesso." : "Produto atualizado com sucesso."
         request(data).then(async res => {
             var json = await res.json();
             if (res.ok) {
                 toastRef.current.show({ severity: 'success', summary: 'Successo!', detail: successMessage, life: 3000 });
-                navigate({ to: `/produtos`, replace: true });
+                navigate({ to: `/pedidos`, replace: true });
             } else {
                 toastRef.current.show({ severity: 'error', summary: 'Erro!', detail: json.message });
             }
@@ -59,15 +63,16 @@ export default function ProductForm() {
     };
 
     const getFormErrorMessage = path => {
-        var value = path.split('.').reduce((o, p) => o && o[p], errors);
-        return value && <small className="p-error">{value.message}</small>;
+        console.log(errors);
+        //var value = path.split('.').reduce((o, p) => o && o[p], errors);
+        //return value && <small className="p-error">{value.message}</small>;
     };
 
     const start = () => <>
         <Button
             type="button"
             icon="pi pi-arrow-left"
-            onClick={() => navigate({ to: `/produtos`, replace: true })}
+            onClick={() => navigate({ to: `/pedidos`, replace: true })}
         />
     </>;
 
@@ -84,15 +89,33 @@ export default function ProductForm() {
         <>
             <div className="content">
                 <Toast ref={toastRef} />
-                <h2>Cadastro de Produtos</h2>
+                <h2>{isNewRecord ? "Novo pedido" : "Atualizar pedido"}</h2>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <Toolbar className="p-1 m-1" start={start} end={end} />
                     <div className="card p-2">
                         <div className="p-fluid grid">
                             <div className="field col-12 md:col-6">
-                                <label htmlFor="name" className={classNames({ 'p-error': errors.name })}>Nome*</label>
+                                <label htmlFor="due_date" className={classNames({ 'p-error': errors.due_date })}>Data de Entrega</label>
                                 <Controller
-                                    name="name"
+                                    name="due_date"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Calendar id={field.name} {...field}
+                                            value={field.value}
+                                            dateFormat="dd/mm/yy"
+                                            showButtonBar
+                                            showIcon
+                                            minDate={new Date()}
+                                            onChange={e => field.onChange(e.value)}></Calendar>
+                                    )} />
+                                {getFormErrorMessage('due_date')}
+                            </div>
+                        </div>
+                        <div className="p-fluid grid">
+                            <div className="field col-12 md:col-6">
+                                <label htmlFor="customer.phone" className={classNames({ 'p-error': errors.customer && errors.customer.phone })}>Telefone do cliente*</label>
+                                <Controller
+                                    name="customer.phone"
                                     control={control}
                                     render={({ field, fieldState }) => (
                                         <InputText id={field.name} {...field}
@@ -100,8 +123,22 @@ export default function ProductForm() {
                                             onChange={e => field.onChange(e.target.value)}
                                             className={classNames({ 'p-invalid': fieldState.error })} />
                                     )} />
-                                {getFormErrorMessage('name')}
+                                {getFormErrorMessage('customer.phone')}
                             </div>
+                            <div className="field col-12 md:col-6">
+                                <label htmlFor="customer.name" className={classNames({ 'p-error': errors.customer && errors.customer.name })}>Nome do cliente*</label>
+                                <Controller
+                                    name="customer.name"
+                                    control={control}
+                                    render={({ field, fieldState }) => (
+                                        <InputText id={field.name} {...field}
+                                            value={field.value}
+                                            onChange={e => field.onChange(e.target.value)}
+                                            className={classNames({ 'p-invalid': fieldState.error })} />
+                                    )} />
+                                {getFormErrorMessage('customer.name')}
+                            </div>
+                            {/*
                         </div>
                         <div className="p-fluid grid">
                             <div className="field col-6 md:col-3">
@@ -130,7 +167,7 @@ export default function ProductForm() {
                                             rows={5}
                                             onChange={e => field.onChange(e.target.value)} />
                                     )} />
-                            </div>
+                            </div>*/}
                         </div>
                     </div>
                 </form>
