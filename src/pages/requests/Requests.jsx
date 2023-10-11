@@ -43,6 +43,11 @@ export default function Requests() {
         window.open(url);
     };
 
+    const openFacebook = e => {
+        const url = `https://m.me/${selected.customer.facebook_chat_number}`;//6466609060116754
+        window.open(url);
+    };
+
     const printRequest = e => {
         toastRef.current.show({ severity: 'info', summary: 'Aviso!', detail: "Funcionalidade ainda não implementada", life: 3000 });
     };
@@ -72,10 +77,11 @@ export default function Requests() {
         <>
             <Toast ref={toastRef} />
             <div className="content">
-                <Card title="Pedidos" className="my-3">
+                <Card title="Pedidos" className="my-1">
                     <div>
                         <Button raised
                             label="Novo Pedido"
+                            className="m-1"
                             severity="info" icon="pi pi-plus"
                             onClick={() => navigate({ to: "novo", replace: true })}
                         />
@@ -83,20 +89,20 @@ export default function Requests() {
                             tooltip="Editar"
                             tooltipOptions={{ position: "top" }}
                             icon="pi pi-pencil"
-                            className="ml-1"
+                            className="m-1"
                             disabled={selected === null}
                             onClick={() => navigate({ to: selected.id, replace: true })}
                         />
                         <Button raised
                             icon="pi pi-print"
-                            className="ml-1"
+                            className="m-1"
                             tooltip="Imprimir Detalhes"
                             tooltipOptions={{ position: "top" }}
                             disabled={selected === null}
                             onClick={printRequest}
                         />
                         <Button raised
-                            className="p-button-success ml-1"
+                            className="p-button-success m-1"
                             icon="pi pi-whatsapp"
                             onClick={openWhatsApp}
                             tooltip="Abrir WhatsApp"
@@ -104,8 +110,16 @@ export default function Requests() {
                             disabled={selected === null}
                         />
                         <Button raised
+                            className="p-button-info m-1"
+                            icon="pi pi-facebook"
+                            onClick={openFacebook}
+                            tooltip="Abrir chat do Facebook"
+                            tooltipOptions={{ position: "top" }}
+                            disabled={selected === null || !selected.customer?.facebook_chat_number}
+                        />
+                        <Button raised
                             icon="pi pi-trash"
-                            className="ml-1"
+                            className="m-1"
                             disabled={selected === null}
                             severity="warning"
                             tooltip="Deletar"
@@ -113,13 +127,13 @@ export default function Requests() {
                             onClick={() => showDeleteConfirmationDialog()}
                         />
                         <Button raised
-                            className="ml-1"
+                            className="m-1"
                             icon="pi pi-refresh"
                             tooltip="Atualizar Lista"
                             tooltipOptions={{ position: "top" }}
                             onClick={() => fetchRequests()} />
-                                                    <Button raised
-                            className="ml-1"
+                        <Button raised
+                            className="m-1"
                             icon="pi pi-check-circle"
                             tooltip="Finalizar Pedido"
                             tooltipOptions={{ position: "top" }}

@@ -17,6 +17,9 @@ export default Yup.object().shape({
             .default("")
             .min(2, "Nome deve possuir ao menos dois caracteres")
             .required("Obrigatório informar nome do cliente"),
+        facebook_chat_number: Yup.string()
+            .default("")
+            .optional(),
         created_at: Yup.string()
             .optional()
     }).required("Obrigatório informar dados do cliente!"),

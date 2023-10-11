@@ -188,7 +188,7 @@ export default function RequestForm() {
                             </div>
                         </div>
                         <div className="p-fluid grid">
-                            <div className="field col-6 md:col-4">
+                            <div className="field col-10 md:col-4">
                                 <label htmlFor="customer.name" className={classNames({ 'p-error': errors.customer && errors.customer.name })}>Nome*</label>
                                 <Controller
                                     name="customer.name"
@@ -201,13 +201,31 @@ export default function RequestForm() {
                                     )} />
                                 {getFormErrorMessage('customer.name')}
                             </div>
-                            <div className="field col-3">
+                            <div className="field col-6 md:col-3">
                                 <label htmlFor="custome_.created_at">Cadastrado em</label>
                                 <InputText id="created_at" disabled value={getValues().customer?.id ? formatToBRDateTime(getValues().customer.created_at) : "Novo cadastro"} />
                             </div>
                         </div>
                         <div className="p-fluid grid">
-                            <div className="field col-6 md:col-4">
+                            <div className="field col-10 md:col-4">
+                                <label htmlFor="customer.facebook_chat_number" >Número do chat no Facebook/Messenger</label>
+                                <Controller
+                                    name="customer.facebook_chat_number"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <div className="p-inputgroup">
+                                            <span className="p-inputgroup-addon">
+                                                <i className="pi pi-facebook"></i>
+                                            </span>
+                                            <InputText id={field.name} {...field}
+                                                value={field.value}
+                                                onChange={e => field.onChange(e.target.value)} />
+                                        </div>
+                                    )} />
+                            </div>
+                        </div>
+                        <div className="p-fluid grid">
+                            <div className="field col-10 md:col-6">
                                 <label htmlFor="notes">Observações</label>
                                 <Controller
                                     name="notes"
@@ -220,7 +238,7 @@ export default function RequestForm() {
                             </div>
                         </div>
                         <Divider />
-                        <div className="flex justify-content-center">
+                        <div className="p-fluid grid">
                             <div className="p-datatable p-component p-datatable-responsive-scroll p-datatable-gridlines">
                                 <div className="p-datatable-header">
                                     <div className="flex flex-wrap align-items-center justify-content-between gap-2">
@@ -228,7 +246,6 @@ export default function RequestForm() {
                                         <Button raised
                                             type="button"
                                             icon="pi pi-plus"
-                                            label="Add produto"
                                             size="small" rounded
                                             onClick={appendProduct} />
                                     </div>
@@ -242,7 +259,7 @@ export default function RequestForm() {
                                                         <span className="p-column-title">Item</span>
                                                     </div>
                                                 </th>
-                                                <th className="w-2">
+                                                <th className="w-3">
                                                     <div className="p-column-header-content">
                                                         <span className="p-column-title">Valor Unitário</span></div>
                                                 </th>
