@@ -15,7 +15,7 @@ import { useNavigate, useMatch } from 'react-location';
 import requestSchema from "../../schemas/RequestSchema";
 import { saveNewRequest, updateRequest } from "../../services/RequestService";
 import { getCustomersByPhone } from "../../services/CustomerService";
-import { convertDate, formatToBRDateTime } from "../../components/Utils";
+import { convertDate, formatToBRCurrency, formatToBRDateTime } from "../../components/Utils";
 import "./RequestForm.css";
 
 export default function RequestForm() {
@@ -140,11 +140,12 @@ export default function RequestForm() {
                                 <Controller
                                     name="due_date"
                                     control={control}
-                                    render={({ field, fieldState }) => ( 
+                                    render={({ field, fieldState }) => (
                                         <Calendar
                                             id={field.name}
                                             {...field}
                                             value={field.value instanceof Date ? field.value : convertDate(field.value)}
+                                            className={classNames({ 'p-invalid': fieldState.error })}
                                             readOnlyInput
                                             dateFormat="dd/mm/yy"
                                         />
@@ -307,7 +308,7 @@ export default function RequestForm() {
                                                                             value={fields[i].unitary_value}
                                                                             //TODO: replace watch by...
                                                                             //disabled={!fields[i].product}
-                                                                            disabled={watch(`request_products[${i}].product`) === null}
+                                                                            disabled={!watch(`request_products[${i}].product`)?.id}
                                                                             onChange={e => field.onChange(e.value)}
                                                                             className={classNames({ 'p-invalid': fieldState.error })} />
                                                                     </div>
@@ -331,7 +332,7 @@ export default function RequestForm() {
                                                                             value={fields[i].amount}
                                                                             //TODO: replace watch by...
                                                                             //disabled={!fields[i].product}
-                                                                            disabled={watch(`request_products[${i}].product`) === null}
+                                                                            disabled={!watch(`request_products[${i}].product`)?.id}
                                                                             onChange={e => field.onChange(e.value)}
                                                                             className={classNames({ 'p-invalid': fieldState.error })} />
                                                                     </div>
@@ -352,6 +353,13 @@ export default function RequestForm() {
                                                 </tr>
                                             ))}
                                         </tbody>
+                                        <tfoot className="p-datatable-tfoot">
+                                            <tr>
+                                                <td role="cell" colSpan="1">Total:</td>
+                                                <td role="cell">{formatToBRCurrency(watch("request_products")?.filter(rp => rp.unitary_value > 0 && rp.amount > 0).reduce((prevVal, rp) => prevVal + (rp.unitary_value * rp.amount), 0))}</td>
+                                                <td role="cell" colSpan="2"></td>
+                                            </tr>
+                                        </tfoot>
                                     </table>
                                     <small className="p-error">{errors.request_products?.message}</small>
                                 </div>

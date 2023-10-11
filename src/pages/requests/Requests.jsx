@@ -5,10 +5,9 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { Toast } from "primereact/toast";
 import "./Requests.css";
-import { createWhatsAppLink, formatToBRDateTime, formatToBRDate } from "../../components/Utils";
+import { createWhatsAppLink, formatToBRDateTime, formatToBRDate, formatToBRCurrency } from "../../components/Utils";
 import { getRequests } from "../../services/RequestService";
 
 export default function Requests() {
@@ -21,7 +20,6 @@ export default function Requests() {
     const navigate = useNavigate();
     const [requests, setRequests] = useState([]);
     const [selected, setSelected] = useState(null);
-    const [showDialog, setShowDialog] = useState(false);
 
     useEffect(() => {
         console.log("Starting Requests");
@@ -67,16 +65,7 @@ export default function Requests() {
     }
 
     const showDeleteConfirmationDialog = () => {
-        confirmDialog({
-            message: 'Deseja realmente deletar este produto?',
-            header: 'Confirmar exclusão',
-            icon: 'pi pi-info-circle',
-            acceptClassName: 'p-button-danger',
-            acceptLabel: "Sim",
-            rejectLabel: "Não",
-            accept: deleteSelectedProduct,
-            reject: () => { }
-        });
+        toastRef.current.show({ severity: 'info', summary: 'Aviso!', detail: "Funcionalidade ainda não implementada", life: 3000 });
     }
 
     return (
@@ -155,6 +144,7 @@ export default function Requests() {
                         <Column header="Cliente" field="customer.name" ></Column>
                         <Column header="Telefone" field="customer.phone" ></Column>
                         <Column header="Items" body={itemsColumn} ></Column>
+                        <Column header="Total" body={row => formatToBRCurrency(row.request_products.reduce((prevVal, rp) => prevVal + (rp.unitary_value * rp.amount), 0))} ></Column>
                         <Column header="Finalizado?" body={row => row.done ? "Sim" : "Não"} ></Column>
                     </DataTable>
                 </div>
