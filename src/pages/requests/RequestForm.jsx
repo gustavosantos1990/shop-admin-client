@@ -15,8 +15,8 @@ import { useNavigate, useMatch } from 'react-location';
 import requestSchema from "../../schemas/RequestSchema";
 import { saveNewRequest, updateRequest } from "../../services/RequestService";
 import { getCustomersByPhone } from "../../services/CustomerService";
-import "./RequestForm.css";
 import { convertDate, formatToBRDateTime } from "../../components/Utils";
+import "./RequestForm.css";
 
 export default function RequestForm() {
 
@@ -35,7 +35,7 @@ export default function RequestForm() {
     const [request, setRequest] = useState(routeData.data.request);
     const [products] = useState(routeData.data.products);
 
-    const { register, control, formState, handleSubmit, reset, getValues, watch } = useForm(
+    const { control, handleSubmit, reset, getValues, watch } = useForm(
         {
             defaultValues: isNewRecord ? requestSchema.cast() : request,
             mode: "onBlur",
@@ -43,32 +43,9 @@ export default function RequestForm() {
         }
     );
     const { fields, append, remove } = useFieldArray({ name: 'request_products', control });
-    //const { errors } = formState;
     const { errors } = useFormState({
         control
     });
-
-    /*
-    useEffect(() => {
-        if (isNewRecord) {
-            console.log("Starting request form for new request");
-        } else {
-            console.log("Starting request form for existing request");
-            console.log(JSON.stringify(request, null, 2))
-            //TODO: check if necessary
-            //setRequest(request)
-        }
-    }, []);
-    */
-
-    /*
-    useEffect(() => {
-        console.log("starting form")
-        if (isNewRecord === false) {
-            reset(request)
-        }
-    }, [isNewRecord]);
-    */
 
     const findCustomerByPhone = () => {
         getCustomersByPhone(getValues().customer.phone)
@@ -166,18 +143,10 @@ export default function RequestForm() {
                                     render={({ field, fieldState }) => ( 
                                         <Calendar
                                             id={field.name}
-                                            //inputId={"due_date"}
                                             {...field}
                                             value={field.value instanceof Date ? field.value : convertDate(field.value)}
-                                            //value={convertDate(getValues().due_date)}
-                                            //{...register("due_date")}
                                             readOnlyInput
-                                            //className={"p-inputtext-lg " + (classNames({ 'p-invalid': fieldState.error }))}
                                             dateFormat="dd/mm/yy"
-                                            //showButtonBar
-                                            //showIcon
-                                            //onChange={field.onChange}
-                                            //onChange={e => { console.log(e); field.onChange(e.value) }}
                                         />
                                     )} />
                                 {getFormErrorMessage('due_date')}
@@ -249,34 +218,6 @@ export default function RequestForm() {
                                     )} />
                             </div>
                         </div>
-
-                        {/*                         <div className="p-fluid grid">
-                            <div className="field col-6 md:col-3">
-                                <Controller
-                                    name="product"
-                                    control={control}
-                                    render={({ field, fieldState }) =>
-                                        <div>
-                                            <div>
-                                                <Dropdown
-                                                    id={field.name}
-                                                    {...field}
-                                                    value={field.value}
-                                                    options={products}
-                                                    onChange={(e) => field.onChange(e.target.value)}
-                                                    placeholder="Selecione um produto"
-                                                    optionLabel="name"
-                                                    className={classNames({ 'p-invalid': fieldState.error })}
-                                                />
-                                            </div>
-                                            <div>
-                                                <small className="p-error">{errors.product?.id?.message}</small>
-                                            </div>
-                                        </div>
-                                    } />
-                            </div>
-                        </div> */}
-
                         <Divider />
                         <div className="flex justify-content-center">
                             <div className="p-datatable p-component p-datatable-responsive-scroll p-datatable-gridlines">
@@ -315,49 +256,6 @@ export default function RequestForm() {
                                                 </th>
                                             </tr>
                                         </thead>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                                         <tbody className="p-datatable-tbody">
                                             {fields.map((item, i) => (
                                                 <tr key={i}>

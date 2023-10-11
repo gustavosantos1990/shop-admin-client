@@ -49,6 +49,10 @@ export default function Requests() {
         toastRef.current.show({ severity: 'info', summary: 'Aviso!', detail: "Funcionalidade ainda não implementada", life: 3000 });
     };
 
+    const finishRequest = e => {
+        toastRef.current.show({ severity: 'info', summary: 'Aviso!', detail: "Funcionalidade ainda não implementada", life: 3000 });
+    };
+
     const sendToForm = e => {
         navigate({ to: e.data.id, replace: true })
     };
@@ -125,6 +129,12 @@ export default function Requests() {
                             tooltip="Atualizar Lista"
                             tooltipOptions={{ position: "top" }}
                             onClick={() => fetchRequests()} />
+                                                    <Button raised
+                            className="ml-1"
+                            icon="pi pi-check-circle"
+                            tooltip="Finalizar Pedido"
+                            tooltipOptions={{ position: "top" }}
+                            onClick={() => finishRequest()} />
                     </div>
                 </Card>
                 <div className="scrollable">
@@ -145,7 +155,7 @@ export default function Requests() {
                         <Column header="Cliente" field="customer.name" ></Column>
                         <Column header="Telefone" field="customer.phone" ></Column>
                         <Column header="Items" body={itemsColumn} ></Column>
-                        <Column header="Finalizado?" field="done" ></Column>
+                        <Column header="Finalizado?" body={row => row.done ? "Sim" : "Não"} ></Column>
                     </DataTable>
                 </div>
             </div>
