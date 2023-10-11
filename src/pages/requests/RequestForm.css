@@ -1,0 +1,16 @@
+/*
+.p-datatable-table .p-datatable-tbody tr td {
+    padding: 2px;
+    border-radius: 5px;
+}
+
+.p-datatable-table .p-datatable-tbody tr {
+    color: white;
+    background-color: rgb(218, 117, 117);
+}
+*/
+
+.p-datatable .p-datatable-header {
+    padding-bottom: 5px;
+    padding-top: 5px;
+}

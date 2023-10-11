@@ -27,11 +27,10 @@ export function formatToBRDateTime(value) {
     return new Intl.DateTimeFormat('pt-BR', brDateTimeOptions).format(new Date(value))
 }
 
-export function formatToBRDate(value) {
-    if (!value || value === null) return null;
-
+export function formatToBRDate(date) {
+    if (!date || date === null) return null;
     var brDateTimeOptions = { dateStyle: "short" };
-    return new Intl.DateTimeFormat('pt-BR', brDateTimeOptions).format(new Date(value))
+    return new Intl.DateTimeFormat('pt-BR', brDateTimeOptions).format(convertDate(date))
 }
 
 export function convertDate(dateAsString) {

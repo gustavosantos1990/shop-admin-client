@@ -5,8 +5,11 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { Toast } from "primereact/toast";
 import "./Requests.css";
-import { createWhatsAppLink, formatToBRDateTime } from "../../components/Utils";
+import { createWhatsAppLink, formatToBRDateTime, formatToBRDate } from "../../components/Utils";
+import { getRequests } from "../../services/RequestService";
 
 export default function Requests() {
 
@@ -43,38 +46,85 @@ export default function Requests() {
     };
 
     const printRequest = e => {
-        console.error("not implemented");
+        toastRef.current.show({ severity: 'info', summary: 'Aviso!', detail: "Funcionalidade ainda não implementada", life: 3000 });
+    };
+
+    const sendToForm = e => {
+        navigate({ to: e.data.id, replace: true })
+    };
+
+    const fetchRequests = () => {
+        getRequests()
+            .then(res => res.json())
+            .then(res => {
+                setRequests(res);
+                toastRef.current.show({ severity: 'success', summary: 'Successo!', detail: "Listagem atualizada!", life: 3000 });
+            });
+    }
+
+    const showDeleteConfirmationDialog = () => {
+        confirmDialog({
+            message: 'Deseja realmente deletar este produto?',
+            header: 'Confirmar exclusão',
+            icon: 'pi pi-info-circle',
+            acceptClassName: 'p-button-danger',
+            acceptLabel: "Sim",
+            rejectLabel: "Não",
+            accept: deleteSelectedProduct,
+            reject: () => { }
+        });
     }
 
     return (
         <>
+            <Toast ref={toastRef} />
             <div className="content">
                 <Card title="Pedidos" className="my-3">
                     <div>
-                        <Button
+                        <Button raised
                             label="Novo Pedido"
                             severity="info" icon="pi pi-plus"
                             onClick={() => navigate({ to: "novo", replace: true })}
                         />
-                        <Button
-                            label="Editar"
+                        <Button raised
+                            tooltip="Editar"
+                            tooltipOptions={{ position: "top" }}
                             icon="pi pi-pencil"
                             className="ml-1"
                             disabled={selected === null}
                             onClick={() => navigate({ to: selected.id, replace: true })}
                         />
-                        <Button
+                        <Button raised
                             icon="pi pi-print"
                             className="ml-1"
+                            tooltip="Imprimir Detalhes"
+                            tooltipOptions={{ position: "top" }}
                             disabled={selected === null}
                             onClick={printRequest}
                         />
-                        <Button
+                        <Button raised
                             className="p-button-success ml-1"
                             icon="pi pi-whatsapp"
                             onClick={openWhatsApp}
+                            tooltip="Abrir WhatsApp"
+                            tooltipOptions={{ position: "top" }}
                             disabled={selected === null}
                         />
+                        <Button raised
+                            icon="pi pi-trash"
+                            className="ml-1"
+                            disabled={selected === null}
+                            severity="warning"
+                            tooltip="Deletar"
+                            tooltipOptions={{ position: "top" }}
+                            onClick={() => showDeleteConfirmationDialog()}
+                        />
+                        <Button raised
+                            className="ml-1"
+                            icon="pi pi-refresh"
+                            tooltip="Atualizar Lista"
+                            tooltipOptions={{ position: "top" }}
+                            onClick={() => fetchRequests()} />
                     </div>
                 </Card>
                 <div className="scrollable">
@@ -86,13 +136,14 @@ export default function Requests() {
                         dataKey="id"
                         selectionMode="single"
                         selection={selected}
-                        onSelectionChange={(e) => { console.log(e); setSelected(e.value) }}
+                        onSelectionChange={(e) => setSelected(e.value)}
+                        onRowDoubleClick={sendToForm}
                     >
                         <Column header="ID" field="id" ></Column>
-                        <Column header="Data do pedido" body={row => formatToBRDateTime(row.created_at)} ></Column>
+                        <Column header="Data da Entrega" body={row => formatToBRDate(row.due_date)} ></Column>
+                        <Column header="Cadastrado em" body={row => formatToBRDateTime(row.created_at)} ></Column>
                         <Column header="Cliente" field="customer.name" ></Column>
                         <Column header="Telefone" field="customer.phone" ></Column>
-                        <Column header="Data de entrega" field="due_date" ></Column>
                         <Column header="Items" body={itemsColumn} ></Column>
                         <Column header="Finalizado?" field="done" ></Column>
                     </DataTable>
