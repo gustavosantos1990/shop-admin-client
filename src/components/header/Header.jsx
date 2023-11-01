@@ -14,7 +14,7 @@ export default function Header() {
         },
         {
             label: "Pedidos",
-            icon: "pi pi-fw pi-money-bill",
+            icon: "pi pi-fw pi-shopping-bag",
             command: () => navigate({ to: "/pedidos", replace: true })
         },
         {
@@ -23,8 +23,22 @@ export default function Header() {
             command: () => navigate({ to: "/produtos", replace: true })
         },
         {
+            label: 'Componentes',
+            icon: 'pi pi-fw pi-th-large'
+        },
+        {
             label: "Agenda",
             icon: "pi pi-fw pi-calendar",
+            command: () => navigate({ to: "/agenda", replace: true })
+        },
+        {
+            label: "Movimentações",
+            icon: "pi pi-fw pi-money-bill",
+            command: () => navigate({ to: "/agenda", replace: true })
+        },
+        {
+            label: "Compras",
+            icon: "pi pi-fw pi-shopping-cart",
             command: () => navigate({ to: "/agenda", replace: true })
         }
     ];

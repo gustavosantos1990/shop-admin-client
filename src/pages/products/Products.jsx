@@ -22,7 +22,7 @@ export default function Products() {
     const toastRef = useRef(null);
     const [products, setProducts] = useState([]);
     const [selected, setSelected] = useState(null);
-    const [includeDeleted, setIncludeDeleted] = useState(false);
+    const [includeDeleted, setIncludeDeleted] = useState(true);
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS }
     });
@@ -120,18 +120,36 @@ export default function Products() {
             accept: deleteSelectedProduct,
             reject: () => { }
         });
-    }
+    };
+
+    const costColumn = row => {
+        var cost = row.components?.map(c => c.cost).reduce((prev, val) => prev + val, 0.00);
+        return formatToBRCurrency(cost, 2, 2);
+    };
+
+    const rowClass = row => {
+        return {
+            'bg-red-200': row.deleted_at !== null && row.deleted_at !== undefined
+        };
+    };
 
     return (
         <>
-            <div className="content">
+            <div className="content mx-8">
                 <Toast ref={toastRef} />
                 <ConfirmDialog />
-                <Card title="PRODUTOS" className="my-3">
+                <h2>Cadastro de Produtos</h2>
+                <Card className="my-3">
                     <div>
                         <Button
-                            label="Novo Pedido"
+                            label="Novo Produto"
                             severity="info" icon="pi pi-plus"
+                            onClick={() => navigate({ to: "novo", replace: true })}
+                        />
+                        <Button
+                            label="Clonar"
+                            className="ml-1"
+                            severity="info" icon="pi pi-copy"
                             onClick={() => navigate({ to: "novo", replace: true })}
                         />
                         <Button
@@ -166,10 +184,13 @@ export default function Products() {
                         header={tableHeader}
                         emptyMessage="Sem resultados..."
                         loading={loading}
+                        rowClassName={rowClass}
                     >
                         <Column header="Nome" field="name" ></Column>
                         <Column header="Criado em" body={row => formatToBRDateTime(row.created_at)} ></Column>
+                        <Column header="Deletado em" body={row => formatToBRDateTime(row.deleted_at)} ></Column>
                         <Column header="Preço" body={row => formatToBRCurrency(row.price, 2, 2)} ></Column>
+                        <Column header="Custo" body={costColumn} ></Column>
                     </DataTable>
                 </div>
             </div>

@@ -48,9 +48,19 @@ export function parseDate(dateAsString) {
     var date = new Date(dateAsString);
     date.setDate(date.getDate() + 1);
     return date;
+};
+
+export function extractDigitsFromString(str) {
+    return str.replace(/\D/g, '');
 }
 
 export function createWhatsAppLink(number) {
-    var onlyNumbers = number.replace(/\D/g, '');
+    var onlyNumbers = extractDigitsFromString(number);
     return "https://api.whatsapp.com/send?phone=55" + onlyNumbers;
-}
+};
+
+export function applyPhoneMask(phone) {
+    return phone.length > 10
+        ? phone.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3')
+        : phone.replace(/^(\d{2})(\d{4;})(\d{4}).*/, '($1) $2-$3')
+};

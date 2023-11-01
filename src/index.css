@@ -34,12 +34,12 @@ body {
 
 #root .content .scrollable .p-datatable {
   display: flex;
-  overflow: auto;
+  overflow: hidden;
 }
 
 #root .content .scrollable .p-datatable .p-datatable-wrapper {
   flex: 1 1 auto;
-  overflow-y: scroll;
+  overflow: auto;
 }
 
 .content {

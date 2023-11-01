@@ -7,7 +7,7 @@ import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import "./Requests.css";
-import { createWhatsAppLink, formatToBRDateTime, formatToBRDate, formatToBRCurrency } from "../../components/Utils";
+import { createWhatsAppLink, formatToBRDateTime, formatToBRDate, formatToBRCurrency, applyPhoneMask } from "../../components/Utils";
 import { getRequests } from "../../services/RequestService";
 
 export default function Requests() {
@@ -53,6 +53,14 @@ export default function Requests() {
     };
 
     const finishRequest = e => {
+        toastRef.current.show({ severity: 'info', summary: 'Aviso!', detail: "Funcionalidade ainda não implementada", life: 3000 });
+    };
+
+    const cancelRequest = e => {
+        toastRef.current.show({ severity: 'info', summary: 'Aviso!', detail: "Funcionalidade ainda não implementada", life: 3000 });
+    };
+
+    const sendToMovimentations = e => {
         toastRef.current.show({ severity: 'info', summary: 'Aviso!', detail: "Funcionalidade ainda não implementada", life: 3000 });
     };
 
@@ -121,10 +129,19 @@ export default function Requests() {
                             icon="pi pi-trash"
                             className="m-1"
                             disabled={selected === null}
-                            severity="warning"
+                            severity="danger"
                             tooltip="Deletar"
                             tooltipOptions={{ position: "top" }}
                             onClick={() => showDeleteConfirmationDialog()}
+                        />
+                        <Button raised
+                            icon="pi pi-ban"
+                            className="m-1"
+                            disabled={selected === null}
+                            severity="warning"
+                            tooltip="Cancelar"
+                            tooltipOptions={{ position: "top" }}
+                            onClick={() => cancelRequest()}
                         />
                         <Button raised
                             className="m-1"
@@ -133,9 +150,17 @@ export default function Requests() {
                             tooltipOptions={{ position: "top" }}
                             onClick={() => fetchRequests()} />
                         <Button raised
+                            className="p-button-success m-1"
+                            icon="pi pi-money-bill"
+                            tooltip="Movimentações"
+                            disabled={selected === null}
+                            tooltipOptions={{ position: "top" }}
+                            onClick={() => sendToMovimentations()} />
+                        <Button raised
                             className="m-1"
                             icon="pi pi-check-circle"
                             tooltip="Finalizar Pedido"
+                            disabled={selected === null}
                             tooltipOptions={{ position: "top" }}
                             onClick={() => finishRequest()} />
                     </div>
@@ -152,14 +177,13 @@ export default function Requests() {
                         onSelectionChange={(e) => setSelected(e.value)}
                         onRowDoubleClick={sendToForm}
                     >
-                        <Column header="ID" field="id" ></Column>
                         <Column header="Data da Entrega" body={row => formatToBRDate(row.due_date)} ></Column>
-                        <Column header="Cadastrado em" body={row => formatToBRDateTime(row.created_at)} ></Column>
+                        <Column header="Status" field="status.label" ></Column>
                         <Column header="Cliente" field="customer.name" ></Column>
-                        <Column header="Telefone" field="customer.phone" ></Column>
+                        <Column header="Telefone" body={row => applyPhoneMask(row.customer.phone)} ></Column>
                         <Column header="Items" body={itemsColumn} ></Column>
                         <Column header="Total" body={row => formatToBRCurrency(row.request_products.reduce((prevVal, rp) => prevVal + (rp.unitary_value * rp.amount), 0))} ></Column>
-                        <Column header="Finalizado?" body={row => row.done ? "Sim" : "Não"} ></Column>
+                        
                     </DataTable>
                 </div>
             </div>
