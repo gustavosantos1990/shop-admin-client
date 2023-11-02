@@ -1,9 +1,5 @@
-export const getProducts = async includeDeleted => {
-    const url = new URL('/v1/products', "http://192.168.1.13:9999");
-
-    if (includeDeleted !== undefined && includeDeleted !== null) {
-        url.searchParams.append("include_deleted", includeDeleted);
-    }
+export const getProductComponents = async id => {
+    const url = new URL(`/v1/products/${id}/components`, "http://192.168.1.13:9999");
 
     return new Promise((resolve, reject) =>
         fetch(url, { method: "GET" })
@@ -14,20 +10,8 @@ export const getProducts = async includeDeleted => {
     );
 };
 
-export const getProductByID = async id => {
-    const url = new URL(`/v1/products/${id}`, "http://192.168.1.13:9999");
-
-    return new Promise((resolve, reject) =>
-        fetch(url, { method: "GET" })
-            .catch(err => {
-                console.log(err);
-                reject();
-            }).then(res => resolve(res))
-    );
-};
-
-export const saveNewProduct = async payload => {
-    const url = new URL('/v1/products', "http://192.168.1.13:9999");
+export const saveNewProductComponent = async (productID, payload) => {
+    const url = new URL(`/v1/products/${productID}/components`, "http://192.168.1.13:9999");
 
     return new Promise((resolve, reject) =>
         resolve(
@@ -42,8 +26,8 @@ export const saveNewProduct = async payload => {
     );
 };
 
-export const updateProduct = async payload => {
-    const url = new URL(`/v1/products/${payload.id}`, "http://192.168.1.13:9999");
+export const updateProductComponent = async (productID, componentID, payload) => {
+    const url = new URL(`/v1/products/${productID}/components/${componentID}`, "http://192.168.1.13:9999");
 
     return new Promise((resolve, reject) =>
         resolve(
@@ -58,8 +42,8 @@ export const updateProduct = async payload => {
     );
 };
 
-export const deleteProduct = async id => {
-    const url = new URL(`/v1/products/${id}`, "http://192.168.1.13:9999");
+export const deleteProductComponent = async (productID, componentID) => {
+    const url = new URL(`/v1/products/${productID}/components/${componentID}`, "http://192.168.1.13:9999");
 
     return new Promise((resolve, reject) =>
         resolve(fetch(url, { method: "DELETE" })

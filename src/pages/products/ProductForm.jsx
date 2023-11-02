@@ -13,7 +13,8 @@ import { TabView, TabPanel } from 'primereact/tabview';
 import { classNames } from 'primereact/utils';
 import { useNavigate, useMatch } from 'react-location';
 import productSchema from "../../schemas/ProductSchema";
-import { saveNewProduct, updateProduct } from "../../services/ProductService";
+import { productComponentMultiDimensionMeasureSchema, productComponentSchema } from "../../schemas/ProductComponentSchema";
+import { getProductByID, saveNewProduct, updateProduct } from "../../services/ProductService";
 import { getComponents } from "../../services/ComponentService";
 import { formatToBRDateTime, formatToBRCurrency } from "../../components/Utils";
 import { FilterMatchMode } from 'primereact/api';
@@ -22,6 +23,9 @@ import { Column } from "primereact/column";
 import { ColumnGroup } from "primereact/columngroup";
 import { Row } from "primereact/row";
 import "./ProductForm.css";
+import { deleteProductComponent, saveNewProductComponent, updateProductComponent } from "../../services/ProductComponentService";
+import { Card } from "primereact/card";
+import { Message } from "primereact/message";
 
 export default function ProductForm() {
 
@@ -33,18 +37,32 @@ export default function ProductForm() {
     const [product, setProduct] = useState(routeDate.data.product);
     const [selectedComponent, setSelectedComponent] = useState(null);
     const [selectedDialogComponent, setSelectedDialogComponent] = useState(null);
+    const [openForUpdate, setOpenForUpdate] = useState(false);
     const [components, setComponents] = useState(null);
+    const [formResolver, setFormResolver] = useState(null);
     const [visible, setVisible] = useState(false);
     const [filters, setFilters] = useState({ global: { value: null, matchMode: FilterMatchMode.CONTAINS } });
     const [globalFilterValue, setGlobalFilterValue] = useState('');
 
-    const { control, formState: { errors }, handleSubmit, reset } = useForm(
-        {
+    const {
+        control,
+        formState: { errors },
+        handleSubmit, reset } = useForm({
             defaultValues: productSchema.cast(),
             mode: "onBlur",
             resolver: yupResolver(productSchema)
-        }
-    );
+        });
+
+    const {
+        control: componentControl,
+        formState: { errors: componentErrors },
+        handleSubmit: handleComponentSubmit,
+        watch: componentWatcher,
+        reset: resetComponent } = useForm({
+            defaultValues: formResolver?.cast(),
+            mode: "onBlur",
+            resolver: yupResolver(formResolver)
+        });
 
     useEffect(() => {
         fetchComponents();
@@ -59,10 +77,46 @@ export default function ProductForm() {
         }
     }, [isNewRecord]);
 
+    useEffect(() => {
+        if (selectedDialogComponent != null && selectedDialogComponent !== undefined) {
+            const isMulti = selectedDialogComponent.measure.multi_dimension === true;
+            setFormResolver(isMulti
+                ? productComponentMultiDimensionMeasureSchema
+                : productComponentSchema);
+            if (selectedComponent && openForUpdate) {
+                resetComponent(selectedComponent);
+                return;
+            }
+            console.log("reseting product component form, is multi? " + isMulti);
+            var schema = isMulti
+                ? productComponentMultiDimensionMeasureSchema
+                : productComponentSchema;
+            console.log(schema.cast());
+            resetComponent(Object.assign(schema.cast(), { component: selectedDialogComponent }));
+        }
+    }, [selectedDialogComponent]);
+
     const fetchComponents = () => {
         getComponents()
             .then(res => res.json())
             .then(json => setComponents(json));
+    }
+
+    const fetchProduct = () => {
+        getProductByID(product.id)
+            .then(res => res.json())
+            .then(json => setProduct(json));
+    };
+
+    const deleteSelectedProductComponent = () => {
+        deleteProductComponent(product.id, selectedComponent.component.id)
+            .then(res => {
+                if (res.ok) {
+                    setSelectedComponent(null);
+                    fetchProduct();
+                    toastRef.current.show({ severity: 'success', summary: 'Successo!', detail: "Componente deletado com sucesso.", life: 3000 });
+                }
+            })
     }
 
     const onSubmit = data => {
@@ -81,8 +135,34 @@ export default function ProductForm() {
         });
     };
 
+    const onComponentSubmit = data => {
+        const existingComponent = !product.components || product.components.length === 0 ? null : product.components.find(pc => pc.component.id === data.component.id);
+        const isNewProductComponent = existingComponent === null || existingComponent === undefined;
+        const promisse = isNewProductComponent
+            ? saveNewProductComponent(product.id, data)
+            : updateProductComponent(product.id, data.component.id, data);
+        const successMessage = isNewProductComponent ? "Componente incluído com sucesso." : "Produto atualizado com sucesso."
+
+        promisse.then(async res => {
+            var json = await res.json();
+            if (res.ok) {
+                toastRef.current.show({ severity: 'success', summary: 'Successo!', detail: successMessage, life: 3000 });
+                setSelectedComponent(false);
+                setVisible(false);
+                fetchProduct();
+            } else {
+                toastRef.current.show({ severity: 'error', summary: 'Erro!', detail: json.message });
+            }
+        });
+    };
+
     const getFormErrorMessage = path => {
         var value = path.split('.').reduce((o, p) => o && o[p], errors);
+        return value && <small className="p-error">{value.message}</small>;
+    };
+
+    const getComponentFormErrorMessage = path => {
+        var value = path.split('.').reduce((o, p) => o && o[p], componentErrors);
         return value && <small className="p-error">{value.message}</small>;
     };
 
@@ -94,6 +174,34 @@ export default function ProductForm() {
 
         setFilters(_filters);
         setGlobalFilterValue(value);
+    };
+
+    const clearFilter = () => {
+        let _filters = { ...filters };
+        _filters['global'].value = "";
+        setFilters(_filters);
+        setGlobalFilterValue("");
+    };
+
+    const openComponentsDialog = () => {
+        setOpenForUpdate(false);
+        setSelectedDialogComponent(null);
+        resetComponent(productComponentSchema.cast());
+        setVisible(true);
+        clearFilter();
+    };
+
+    const openComponentsDialogForUpdate = () => {
+        setOpenForUpdate(true);
+        setSelectedDialogComponent(selectedComponent.component);
+        setVisible(true);
+    };
+
+    const openComponentsDialogForUpdateGivenProductComponent = productComponent => {
+        setOpenForUpdate(true);
+        setSelectedComponent(productComponent);
+        setSelectedDialogComponent(productComponent.component);
+        setVisible(true);
     };
 
     const headerGroup = (
@@ -197,99 +305,179 @@ export default function ProductForm() {
                             <div className="flex">
                                 <div className="mr-3">
                                     <h4>Total:</h4>
-                                    <p className="text-2xl">{formatToBRCurrency(product.components?.map(c => c.cost).reduce((prev, val) => prev + val, 0.00), 2, 2)}</p>
+                                    <p className="text-2xl">{formatToBRCurrency(!product.components ? 0.00 : product.components.map(c => c.cost).reduce((prev, val) => prev + val, 0.00), 2, 2)}</p>
                                     <Menu model={[
-                                        { label: 'Novo', icon: 'pi pi-fw pi-plus', command: () => setVisible(true) },
-                                        { label: `Excluir`, icon: 'pi pi-fw pi-trash', disabled: !selectedComponent },
-                                        { label: 'Editar', icon: 'pi pi-fw pi-pencil', disabled: !selectedComponent }
+                                        { label: 'Novo', icon: 'pi pi-fw pi-plus', command: () => openComponentsDialog() },
+                                        { label: `Excluir`, icon: 'pi pi-fw pi-trash', disabled: !selectedComponent, command: () => deleteSelectedProductComponent() },
+                                        { label: 'Editar', icon: 'pi pi-fw pi-pencil', disabled: !selectedComponent, command: () => openComponentsDialogForUpdate() }
                                     ]} />
                                 </div>
                                 <div className="scrollable">
                                     <ContextMenu model={[
-                                        { label: 'Editar', icon: 'pi pi-fw pi-pencil' },
-                                        { label: 'Excluir', icon: 'pi pi-fw pi-trash' },
+                                        { label: 'Editar', icon: 'pi pi-fw pi-pencil', command: () => openComponentsDialogForUpdate() },
+                                        { label: 'Excluir', icon: 'pi pi-fw pi-trash', command: () => deleteSelectedProductComponent() },
                                         { label: 'Limpar seleção', icon: 'pi pi-fw pi-ban', command: () => setSelectedComponent(null) }
                                     ]} ref={contextMenuRef} breakpoint="767px" />
                                     <Dialog
                                         header="Componentes"
                                         visible={visible}
-                                        style={{ width: '60vw' }}
+                                        style={{ width: '50vw', minHeight: '60vh' }}
                                         onHide={() => setVisible(false)}
-                                        footer={<div>
+                                        /* footer={<div>
                                             <Button
                                                 label="Cancelar"
                                                 icon="pi pi-ban"
                                                 severity="danger"
                                                 type="button"
                                                 onClick={() => setVisible(false)} />
-                                            <Button
-                                                label="Salvar"
-                                                severity="success"
-                                                icon="pi pi-save"
-                                                onClick={() => setVisible(false)}
-                                                disabled={selectedDialogComponent === null || selectedDialogComponent === undefined}
-                                                autoFocus />
-                                        </div>}
+                                        </div>} */
                                         position="top-right"
                                         draggable={false}
-                                        closable={false}
                                     >
                                         <div>
-                                            <DataTable
-                                                value={components}
-                                                size="small"
-                                                dataKey="id"
-                                                selectionMode="single"
-                                                selection={selectedDialogComponent}
-                                                onSelectionChange={(e) => setSelectedDialogComponent(e.value)}
-                                                emptyMessage="Sem resultados..."
-                                                paginator
-                                                rows={5}
-                                                filters={filters}
-                                                header={<div className="flex justify-content-between">
-                                                    <div>
+                                            {(!selectedDialogComponent || !openForUpdate)
+                                                ? <DataTable
+                                                    value={components}
+                                                    size="small"
+                                                    dataKey="id"
+                                                    selectionMode="single"
+                                                    selection={selectedDialogComponent}
+                                                    onSelectionChange={(e) => setSelectedDialogComponent(e.value)}
+                                                    emptyMessage="Sem resultados..."
+                                                    paginator
+                                                    rows={5}
+                                                    filters={filters}
+                                                    header={<div className="flex justify-content-between">
                                                         <div>
-                                                            <span className="p-input-icon-left">
-                                                                <i className="pi pi-search" />
-                                                                <InputText value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Pesquisar" />
-                                                            </span>
+                                                            <div>
+                                                                <span className="p-input-icon-left">
+                                                                    <i className="pi pi-search" />
+                                                                    <InputText value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Pesquisar" />
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </div>}
-                                            >
-                                                <Column header="Componente" field="name" style={{ width: '30%' }} ></Column>
-                                                <Column header="Medida" field="measure.symbol" ></Column>
-                                                <Column header="Altura" body={row => row.measure.multi_dimension ? row.base_buy_height.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) : <div className="text-gray-300">{"n/a"}</div>} ></Column>
-                                                <Column header="Largura" body={row => row.measure.multi_dimension ? row.base_buy_width.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) : <div className="text-gray-300">{"n/a"}</div>} ></Column>
-                                                <Column header="Quantidade" body={row => row.base_buy_amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} ></Column>
-                                                <Column header="Valor Pago" body={row => formatToBRCurrency(row.base_buy_paid_value, 2, 2)} ></Column>
-                                            </DataTable>
+                                                    </div>}
+                                                >
+                                                    <Column header="Componente" field="name" style={{ width: '30%' }} ></Column>
+                                                    <Column header="Medida" field="measure.symbol" ></Column>
+                                                    <Column header="Altura" body={row => row.measure.multi_dimension ? row.base_buy_height.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) : <div className="text-gray-300">{"n/a"}</div>} ></Column>
+                                                    <Column header="Largura" body={row => row.measure.multi_dimension ? row.base_buy_width.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) : <div className="text-gray-300">{"n/a"}</div>} ></Column>
+                                                    <Column header="Quantidade" body={row => row.base_buy_amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} ></Column>
+                                                    <Column header="Valor Pago" body={row => formatToBRCurrency(row.base_buy_paid_value, 2, 2)} ></Column>
+                                                </DataTable>
+                                                : <Card title={selectedDialogComponent?.name} className="shadow-4">
+                                                    {selectedDialogComponent && <div>
+                                                        <p>Medida: {selectedDialogComponent.measure.label}</p>
+                                                        {selectedDialogComponent.measure.multi_dimension && <>
+                                                            <p>Altura: {selectedDialogComponent.base_buy_height.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
+                                                            <p>Largura: {selectedDialogComponent.base_buy_width.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
+                                                        </>}
+                                                        <p>Quantidade comprada: {selectedDialogComponent.base_buy_amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
+                                                        <p>Valor pago: {formatToBRCurrency(selectedDialogComponent.base_buy_paid_value)}</p>
+                                                    </div>}
+                                                </Card>
+                                            }
                                         </div>
                                         {selectedDialogComponent && <h3>Quantidade</h3>}
                                         {selectedDialogComponent ? selectedDialogComponent?.measure.multi_dimension === true ?
-                                            <>
+                                            <form onSubmit={handleComponentSubmit(onComponentSubmit)}>
                                                 <div className="p-fluid grid">
                                                     <div className="field col-3">
-                                                        <label htmlFor="height">Altura</label>
-                                                        <InputText id="height" />
+                                                        <label htmlFor="height" className={classNames({ 'p-error': componentErrors.height })}>Altura*</label>
+                                                        <Controller
+                                                            name="height"
+                                                            control={componentControl}
+                                                            render={({ field, fieldState }) =>
+                                                                <InputNumber id={field.name} {...field}
+                                                                    onChange={(e) => field.onChange(e.value)}
+                                                                    locale="pt-BR"
+                                                                    maxFractionDigits={2}
+                                                                    minFractionDigits={2}
+                                                                    className={classNames({ 'p-invalid': fieldState.error })} />
+                                                            } />
+                                                        {getComponentFormErrorMessage('height')}
                                                     </div>
                                                     <div className="field col-3">
-                                                        <label htmlFor="width">Largura</label>
-                                                        <InputText id="width" />
+                                                        <label htmlFor="width" className={classNames({ 'p-error': componentErrors.width })}>Largura*</label>
+                                                        <Controller
+                                                            name="width"
+                                                            control={componentControl}
+                                                            render={({ field, fieldState }) =>
+                                                                <InputNumber id={field.name} {...field}
+                                                                    onChange={(e) => field.onChange(e.value)}
+                                                                    locale="pt-BR"
+                                                                    maxFractionDigits={2}
+                                                                    minFractionDigits={2}
+                                                                    className={classNames({ 'p-invalid': fieldState.error })} />
+                                                            } />
+                                                        {getComponentFormErrorMessage('width')}
                                                     </div>
                                                     <div className="field col-3">
-                                                        <label htmlFor="height">Quantidade</label>
-                                                        <InputText id="height" readOnly disabled />
+                                                        <label htmlFor="amount">Quantidade</label>
+                                                        <InputNumber
+                                                            id="amount"
+                                                            readOnly
+                                                            locale="pt-BR"
+                                                            maxFractionDigits={2}
+                                                            minFractionDigits={2}
+                                                            disabled
+                                                            value={componentWatcher('height') * componentWatcher('width')}
+                                                        />
                                                     </div>
                                                 </div>
-                                            </>
-                                            : <div className="p-fluid grid">
-                                                <div className="field col-3">
-                                                    <label htmlFor="height">Quantidade</label>
-                                                    <InputText id="height" />
+                                                <Button
+                                                    label="Salvar"
+                                                    severity="success"
+                                                    icon="pi pi-save"
+                                                    type="submit"
+                                                    disabled={selectedDialogComponent === null || selectedDialogComponent === undefined}
+                                                />
+                                                <Button
+                                                    className="ml-2"
+                                                    icon="pi pi-eye"
+                                                    type="button"
+                                                    visible={false}
+                                                    onClick={() => console.log(componentErrors)}
+                                                />
+                                            </form>
+                                            : <form onSubmit={handleComponentSubmit(onComponentSubmit)}>
+                                                <div className="p-fluid grid">
+                                                    <div className="field col-3">
+                                                        <label htmlFor="amount" className={classNames({ 'p-error': componentErrors.amount })}>Quantidade*</label>
+                                                        <Controller
+                                                            name="amount"
+                                                            control={componentControl}
+                                                            render={({ field, fieldState }) =>
+                                                                <InputNumber id={field.name} {...field}
+                                                                    onChange={(e) => field.onChange(e.value)}
+                                                                    locale="pt-BR"
+                                                                    maxFractionDigits={2}
+                                                                    minFractionDigits={2}
+                                                                    className={classNames({ 'p-invalid': fieldState.error })} />
+                                                            } />
+                                                        {getComponentFormErrorMessage('amount')}
+                                                    </div>
+                                                </div>
+                                                <Button
+                                                    label="Salvar"
+                                                    severity="success"
+                                                    icon="pi pi-save"
+                                                    type="submit"
+                                                    disabled={selectedDialogComponent === null || selectedDialogComponent === undefined}
+                                                />
+                                                <Button
+                                                    className="ml-2"
+                                                    icon="pi pi-eye"
+                                                    type="button"
+                                                    visible={false}
+                                                    onClick={() => console.log(componentErrors)}
+                                                />
+                                            </form>
+                                            : <div className="mt-2 flex justify-content-center align-content-center flex-wrap" style={{ height: '20vh' }}>
+                                                <div>
+                                                    <Message text="Selecione um componente" severity="warn" />
                                                 </div>
                                             </div>
-                                            : <></>
                                         }
                                     </Dialog>
                                     <DataTable
@@ -307,6 +495,7 @@ export default function ProductForm() {
                                         onContextMenu={(e) => { console.log(e); contextMenuRef.current.show(e.originalEvent) }}
                                         contextMenuSelection={selectedComponent}
                                         onContextMenuSelectionChange={(e) => setSelectedComponent(e.value)}
+                                        onRowDoubleClick={evt => openComponentsDialogForUpdateGivenProductComponent(evt.data)}
                                     >
                                         <Column /* header="Componente" */ field="component.name" ></Column>
                                         <Column /* header="Medida" */ field="component.measure.symbol" ></Column>
@@ -320,6 +509,15 @@ export default function ProductForm() {
                                 </div>
                             </div>
                         </TabPanel >
+                    }
+                    {!isNewRecord &&
+                        <TabPanel
+                            header="Foto"
+                            leftIcon="fa-regular fa-image mr-1"
+                            disabled={isNewRecord}
+                        >
+
+                        </TabPanel>
                     }
                 </TabView >
             </div >

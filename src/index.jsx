@@ -9,6 +9,7 @@ import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
 import "../node_modules/primeflex/primeflex.css";
 /****************PrimeReact*****************/
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 /*ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -23,3 +24,5 @@ root.render(
     <App />
   </PrimeReactProvider>
 );
+
+//https://forum.primefaces.org/viewtopic.php?p=198943#p198943

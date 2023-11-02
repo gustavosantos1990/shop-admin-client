@@ -9,7 +9,7 @@ export default function Header() {
 
     const items = [
         {
-            icon: "pi pi-fw pi-home",
+            icon: "fa-solid fa-house-chimney",
             command: () => navigate({ to: "/", replace: true })
         },
         {
@@ -28,17 +28,17 @@ export default function Header() {
         },
         {
             label: "Agenda",
-            icon: "pi pi-fw pi-calendar",
+            icon: "fa-regular fa-calendar",
             command: () => navigate({ to: "/agenda", replace: true })
         },
         {
             label: "Movimentações",
-            icon: "pi pi-fw pi-money-bill",
+            icon: "fa-solid fa-money-bill-wave",
             command: () => navigate({ to: "/agenda", replace: true })
         },
         {
             label: "Compras",
-            icon: "pi pi-fw pi-shopping-cart",
+            icon: "fa-solid fa-cart-shopping",
             command: () => navigate({ to: "/agenda", replace: true })
         }
     ];

@@ -4,7 +4,7 @@ import { Router, ReactLocation, Outlet } from "react-location";
 import { getRequestByID, getRequests } from "../../services/RequestService";
 import Footer from '../footer/Footer'
 import Header from '../header/Header'
-import { getProducts, getProductsByID } from '../../services/ProductService';
+import { getProducts, getProductByID } from '../../services/ProductService';
 
 export default function App() {
 
@@ -75,7 +75,7 @@ export default function App() {
             if ("novo" === params.id) {
               return { product: null };
             } else {
-              var res = await getProductsByID(params.id);
+              var res = await getProductByID(params.id);
               return { product: await res.json() };
             }
           }

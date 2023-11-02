@@ -12,7 +12,7 @@ import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { FilterMatchMode } from 'primereact/api';
 import "./Products.css";
 import { formatToBRDateTime, formatToBRCurrency } from "../../components/Utils";
-import { deleteProduct, getProducts } from "../../services/ProductService";
+import { deleteProduct, getProducts, saveNewProduct } from "../../services/ProductService";
 
 export default function Products() {
 
@@ -22,7 +22,7 @@ export default function Products() {
     const toastRef = useRef(null);
     const [products, setProducts] = useState([]);
     const [selected, setSelected] = useState(null);
-    const [includeDeleted, setIncludeDeleted] = useState(true);
+    const [includeDeleted, setIncludeDeleted] = useState(false);
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS }
     });
@@ -102,11 +102,61 @@ export default function Products() {
     };
 
     const deleteSelectedProduct = () => {
-        setLoading(true);
-        deleteProduct(selected.id);
-        fetchProducts();
-        setLoading(false);
-        toastRef.current.show({ severity: 'success', summary: 'Successo!', detail: "Produto deletado!", life: 3000 });
+        deleteProduct(selected.id)
+            .then(res => {
+                if (res.ok) {
+                    fetchProducts();
+                    toastRef.current.show({ severity: 'success', summary: 'Successo!', detail: "Produto deletado!", life: 3000 });
+                } else {
+                    res.json().then(json => {
+                        console.log(json);
+                        toastRef.current.show({
+                            severity: 'error',
+                            summary: 'Erro!',
+                            detail: json.message,
+                            life: 3000
+                        });
+                    });
+                }
+            })
+    };
+
+    const cloneSelectedProduct = () => {
+        saveNewProduct(selected)
+            .then(res => {
+                if (res.ok) {
+                    setSelected(null);
+                    fetchProducts();
+                    res.json().then(json => toastRef.current.show({
+                        severity: 'info',
+                        summary: 'Successo!',
+                        sticky: true,
+                        content: (
+                            <div>
+                                <h4>Produto clonado com sucesso!</h4>
+                                <p>Nome: {json.name}</p>
+                                <Button
+                                    label="Abrir"
+                                    icon="pi pi-external-link"
+                                    iconPos="right"
+                                    className="mt-1"
+                                    onClick={() => navigate({ to: json.id, replace: true })}
+                                />
+                            </div>
+                        )
+                    }))
+                } else {
+                    res.json().then(json => {
+                        console.log(json);
+                        toastRef.current.show({
+                            severity: 'error',
+                            summary: 'Erro!',
+                            detail: json.message,
+                            life: 3000
+                        });
+                    });
+                }
+            })
     };
 
     const showDeleteConfirmationDialog = () => {
@@ -118,6 +168,18 @@ export default function Products() {
             acceptLabel: "Sim",
             rejectLabel: "Não",
             accept: deleteSelectedProduct,
+            reject: () => { }
+        });
+    };
+
+    const showCloneConfirmationDialog = () => {
+        confirmDialog({
+            message: 'Deseja realmente clonar este produto?',
+            header: 'Confirmar',
+            icon: 'pi pi-info-circle',
+            acceptLabel: "Sim",
+            rejectLabel: "Não",
+            accept: cloneSelectedProduct,
             reject: () => { }
         });
     };
@@ -143,20 +205,23 @@ export default function Products() {
                     <div>
                         <Button
                             label="Novo Produto"
-                            severity="info" icon="pi pi-plus"
+                            severity="info"
+                            icon="pi pi-plus"
                             onClick={() => navigate({ to: "novo", replace: true })}
                         />
                         <Button
                             label="Clonar"
                             className="ml-1"
-                            severity="info" icon="pi pi-copy"
-                            onClick={() => navigate({ to: "novo", replace: true })}
+                            severity="info"
+                            icon="pi pi-copy"
+                            disabled={!selected}
+                            onClick={() => showCloneConfirmationDialog()}
                         />
                         <Button
                             label="Editar"
                             icon="pi pi-pencil"
                             className="ml-1"
-                            disabled={selected === null}
+                            disabled={!selected}
                             onClick={() => navigate({ to: selected.id, replace: true })}
                         />
                         <Button
@@ -186,9 +251,9 @@ export default function Products() {
                         loading={loading}
                         rowClassName={rowClass}
                     >
-                        <Column header="Nome" field="name" ></Column>
+                        <Column header="Nome" field="name" style={{ width: '50%' }} ></Column>
                         <Column header="Criado em" body={row => formatToBRDateTime(row.created_at)} ></Column>
-                        <Column header="Deletado em" body={row => formatToBRDateTime(row.deleted_at)} ></Column>
+                        {/* <Column header="Deletado em" body={row => formatToBRDateTime(row.deleted_at)} ></Column> */}
                         <Column header="Preço" body={row => formatToBRCurrency(row.price, 2, 2)} ></Column>
                         <Column header="Custo" body={costColumn} ></Column>
                     </DataTable>
