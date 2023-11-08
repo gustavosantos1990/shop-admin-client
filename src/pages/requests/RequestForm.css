@@ -1,16 +1,36 @@
-/*
-.p-datatable-table .p-datatable-tbody tr td {
-    padding: 2px;
-    border-radius: 5px;
+.p-tabview {
+    display: flex;
+    flex-flow: column;
+    overflow: hidden;
+    height: 100%;
 }
 
-.p-datatable-table .p-datatable-tbody tr {
-    color: white;
-    background-color: rgb(218, 117, 117);
+.p-tabview-panels {
+    display: flex;
+    flex-flow: column;
+    overflow: hidden;
+    height: 100%;
 }
-*/
 
-.p-datatable .p-datatable-header {
-    padding-bottom: 5px;
-    padding-top: 5px;
+.p-tabview-panel {
+    display: flex;
+    flex-flow: column;
+    overflow: hidden;
+    height: 100%;
+}
+
+#root .content {
+    overflow: hidden;
+}
+
+.p-card-title {
+    margin: 0;
+}
+.p-card-body {
+    margin: 5px !important;
+    padding: 5px !important;
+}
+
+.p-card-content p {
+    margin: 5px;
 }

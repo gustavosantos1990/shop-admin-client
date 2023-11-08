@@ -64,3 +64,11 @@ export function applyPhoneMask(phone) {
         ? phone.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3')
         : phone.replace(/^(\d{2})(\d{4;})(\d{4}).*/, '($1) $2-$3')
 };
+
+export const currencyProperties = {
+    mode: "currency",
+    currency: "BRL",
+    locale: "pt-BR",
+    minFractionDigits: 2,
+    maxFractionDigits: 2
+};

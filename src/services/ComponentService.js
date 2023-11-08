@@ -1,5 +1,5 @@
 export const getComponents = async includeDeleted => {
-    const url = new URL('/v1/components', "http://192.168.1.13:9999");
+    const url = new URL('/v1/components', "http://localhost:9999");
 
     if (includeDeleted !== undefined && includeDeleted !== null) {
         url.searchParams.append("include_deleted", includeDeleted);
@@ -15,7 +15,7 @@ export const getComponents = async includeDeleted => {
 };
 
 export const getComponentsByID = async id => {
-    const url = new URL(`/v1/components/${id}`, "http://192.168.1.13:9999");
+    const url = new URL(`/v1/components/${id}`, "http://localhost:9999");
 
     return new Promise((resolve, reject) =>
         fetch(url, { method: "GET" })
@@ -27,7 +27,7 @@ export const getComponentsByID = async id => {
 };
 
 export const saveNewComponent = async payload => {
-    const url = new URL('/v1/components', "http://192.168.1.13:9999");
+    const url = new URL('/v1/components', "http://localhost:9999");
 
     return new Promise((resolve, reject) =>
         resolve(
@@ -43,7 +43,7 @@ export const saveNewComponent = async payload => {
 };
 
 export const updateComponent = async payload => {
-    const url = new URL(`/v1/components/${payload.id}`, "http://192.168.1.13:9999");
+    const url = new URL(`/v1/components/${payload.id}`, "http://localhost:9999");
 
     return new Promise((resolve, reject) =>
         resolve(
@@ -59,7 +59,7 @@ export const updateComponent = async payload => {
 };
 
 export const deleteComponent = async id => {
-    const url = new URL(`/v1/components/${id}`, "http://192.168.1.13:9999");
+    const url = new URL(`/v1/components/${id}`, "http://localhost:9999");
 
     return new Promise((resolve, reject) =>
         resolve(fetch(url, { method: "DELETE" })

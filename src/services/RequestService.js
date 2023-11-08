@@ -1,7 +1,10 @@
-export const getRequests = async () => {
-    const url = new URL('/v1/requests', "http://192.168.1.13:9999");
-    url.searchParams.append("start_date", "2023-01-01");
-    url.searchParams.append("end_date", "2023-12-31");
+export const getRequests = async (start, end) => {
+    const url = new URL('/v1/requests', "http://localhost:9999");
+
+    if (start && end) {
+        url.searchParams.append("start_date", start.toISOString().split('T')[0]);
+        url.searchParams.append("end_date", end.toISOString().split('T')[0]);
+    }
 
     return new Promise((resolve, reject) =>
         fetch(url, { method: "GET" })
@@ -14,7 +17,7 @@ export const getRequests = async () => {
 };
 
 export const getRequestByID = async id => {
-    const url = new URL(`/v1/requests/${id}`, "http://192.168.1.13:9999");
+    const url = new URL(`/v1/requests/${id}`, "http://localhost:9999");
 
     return new Promise((resolve, reject) =>
         fetch(url, { method: "GET" })
@@ -26,7 +29,7 @@ export const getRequestByID = async id => {
 };
 
 export const saveNewRequest = async payload => {
-    const url = new URL('/v1/requests', "http://192.168.1.13:9999");
+    const url = new URL('/v1/requests', "http://localhost:9999");
 
     return new Promise((resolve, reject) =>
         resolve(
@@ -42,7 +45,7 @@ export const saveNewRequest = async payload => {
 };
 
 export const updateRequest = async payload => {
-    const url = new URL(`/v1/requests/${payload.id}`, "http://192.168.1.13:9999");
+    const url = new URL(`/v1/requests/${payload.id}`, "http://localhost:9999");
 
     return new Promise((resolve, reject) =>
         resolve(
