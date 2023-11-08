@@ -28,6 +28,7 @@ import { deleteRequestProduct, saveNewRequestProduct, updateRequestProduct } fro
 import { formatToBRCurrency, convertDate } from "../../components/Utils";
 import "./RequestForm.css";
 import { Divider } from "primereact/divider";
+import { updateCustomer } from "../../services/CustomerService";
 
 export default function RequestForm() {
 
@@ -115,12 +116,11 @@ export default function RequestForm() {
     };
 
     const onCustomerSubmit = data => {
-        updateRequest(data).then(async res => {
+        updateCustomer(data).then(async res => {
             var json = await res.json();
             if (res.ok) {
-                toastRef.current.show({ severity: 'success', summary: 'Successo!', detail: "Pedido atualizado com sucesso.", life: 3000 });
-                navigate({ to: `/pedidos/${json.id}`, replace: true, fromCurrent: true });
-                setRequest(json);
+                toastRef.current.show({ severity: 'success', summary: 'Successo!', detail: "Cliente atualizado com sucesso.", life: 3000 });
+                setRequest(Object.assign(request, {customer: json}));
             } else {
                 toastRef.current.show({ severity: 'error', summary: 'Erro!', detail: json.message });
             }
