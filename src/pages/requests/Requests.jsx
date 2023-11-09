@@ -96,6 +96,22 @@ export default function Requests() {
             });
     };
 
+    const updateToDoingSelectedRequest = () => {
+        updateRequestStatus(selected.id, "DOING")
+            .then(async res => {
+                var json = await res.json();
+                if (!res.ok) {
+                    toastRef.current.show({ severity: 'error', summary: 'Erro!', detail: json.message });
+                    return;
+                }
+                fetchRequests(date);
+                toastRef.current.show({
+                    severity: 'success', summary: 'Successo!',
+                    detail: "Status do pedido atualizado com sucesso.", life: 3000
+                });
+            });
+    };
+
     const cancelSelectedRequest = () => {
         updateRequestStatus(selected.id, "CANCELED")
             .then(async res => {
@@ -111,6 +127,18 @@ export default function Requests() {
 
     const showDeleteConfirmationDialog = () => {
         toastRef.current.show({ severity: 'info', summary: 'Aviso!', detail: "Funcionalidade ainda não implementada", life: 3000 });
+    };
+
+    const showDoingConfirmationDialog = () => {
+        confirmDialog({
+            message: 'Deseja realmente colocar pedido EM PRODUÇÃO?',
+            header: 'Confirmar',
+            icon: 'pi pi-info-circle',
+            acceptLabel: "Sim",
+            rejectLabel: "Não",
+            accept: updateToDoingSelectedRequest,
+            reject: () => { }
+        });
     };
 
     const showCancelConfirmationDialog = () => {
@@ -234,6 +262,15 @@ export default function Requests() {
                                     severity="danger"
                                     label="Deletar"
                                     onClick={() => showDeleteConfirmationDialog()}
+                                    size="small"
+                                />
+                                <Button
+                                    raised
+                                    icon="pi pi-palette"
+                                    className="m-1"
+                                    disabled={selected === null}
+                                    label="Seguir para produção"
+                                    onClick={() => showDoingConfirmationDialog()}
                                     size="small"
                                 />
                                 <Button
