@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Calendar } from 'primereact/calendar';
 import { useMatch, useNavigate } from "react-location";
 import { DataTable } from 'primereact/datatable';
@@ -6,73 +6,29 @@ import { Column } from 'primereact/column';
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
+import { OverlayPanel } from "primereact/overlaypanel";
+import { Checkbox } from "primereact/checkbox";
 import "./Requests.css";
 import { createWhatsAppLink, formatToBRDateTime, formatToBRDate, formatToBRCurrency, applyPhoneMask } from "../../components/Utils";
-import { getRequests } from "../../services/RequestService";
+import { getRequests, updateRequestStatus } from "../../services/RequestService";
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 
 export default function Requests() {
 
-    const allowedTypes = ["PRODUCT_COMPONENT", "GIFT"];
-    const allowedMeasures = ["UNITY", "MT", "CM", "MT2", "CM2"];
-    /* const filterPeriodHolder = {
-        next: function () {
-            var first = this.current;
-            first.setMonth(first.getMonth() + 1);
-            first.setDate(1);
-            var last = new Date(first);
-            last.setMonth(last.getMonth() + 1);
-            last.setDate(0);
-            this.current = first;
-            return {
-                first: first,
-                last: last
-            };
-        },
-        previous: function () {
-            var last = this.current;
-            last.setDate(0);
-            var first = new Date(last);
-            first.setDate(1);
-            this.current = first;
-            return {
-                first: first,
-                last: last
-            };
-        },
-        reset: function () {
-            var first = new Date()
-            first.setDate(1);
-            var last = new Date(first);
-            last.setMonth(last.getMonth() + 1);
-            last.setDate(0);
-            this.current = first;
-            return {
-                first: first,
-                last: last
-            };
-        },
-        current: new Date()
-    }; */
-
     const initialData = useMatch().data.requests;
     const toastRef = useRef(null);
+    const overlayPanelRef = useRef(null);
     const navigate = useNavigate();
-    const [date, setDate] = useState(new Date());
+    const [rawRequests, setRawRequests] = useState(initialData);
     const [requests, setRequests] = useState([]);
     const [selected, setSelected] = useState(null);
+    const [date, setDate] = useState(new Date());
+    const [showCanceled, setShowCanceled] = useState(false);
 
     useEffect(() => {
-        console.log("Starting Requests");
-        setRequests(initialData)
-    }, []);
-
-    useEffect(() => {
-        console.log(selected)
-    }, [selected]);
-
-    useEffect(() => {
-        if (date) fetchRequests();
-    }, [date]);
+        var filteredRequests = rawRequests.filter(r => showCanceled || r.status.value !== "CANCELED");
+        setRequests(filteredRequests);
+    }, [rawRequests, showCanceled]);
 
     const itemsColumn = (rowData) => {
         return <div className="flex flex-column align-items-start">
@@ -112,7 +68,7 @@ export default function Requests() {
         navigate({ to: e.data.id, replace: true })
     };
 
-    const periodForSelectedMonth = selectedMonth => {
+    const periodForSelectedMonth = date => {
         var start = new Date(date);
         start.setDate(1);
         var end = new Date(date);
@@ -124,22 +80,49 @@ export default function Requests() {
         };
     };
 
-    const fetchRequests = () => {
+    const fetchRequests = date => {
         const period = periodForSelectedMonth(date);
+        console.log(period.start.toISOString().split('T')[0]);
+        console.log(period.end.toISOString().split('T')[0]);
         getRequests(period.start, period.end)
             .then(async res => {
                 var json = await res.json();
-                if(!res.ok) {
+                if (!res.ok) {
                     toastRef.current.show({ severity: 'error', summary: 'Erro!', detail: json.message });
                     return;
                 }
-                setRequests(json);
+                setRawRequests(json);
                 toastRef.current.show({ severity: 'success', summary: 'Successo!', detail: "Listagem atualizada!", life: 500 });
+            });
+    };
+
+    const cancelSelectedRequest = () => {
+        updateRequestStatus(selected.id, "CANCELED")
+            .then(async res => {
+                var json = await res.json();
+                if (!res.ok) {
+                    toastRef.current.show({ severity: 'error', summary: 'Erro!', detail: json.message });
+                    return;
+                }
+                fetchRequests(date);
+                toastRef.current.show({ severity: 'success', summary: 'Successo!', detail: "Pedido cancelado com sucesso.", life: 3000 });
             });
     };
 
     const showDeleteConfirmationDialog = () => {
         toastRef.current.show({ severity: 'info', summary: 'Aviso!', detail: "Funcionalidade ainda não implementada", life: 3000 });
+    };
+
+    const showCancelConfirmationDialog = () => {
+        confirmDialog({
+            message: 'Deseja realmente CANCELAR este pedido?',
+            header: 'Confirmar',
+            icon: 'pi pi-info-circle',
+            acceptLabel: "Sim",
+            rejectLabel: "Não",
+            accept: cancelSelectedRequest,
+            reject: () => { }
+        });
     };
 
     const tableHeader = (
@@ -148,37 +131,40 @@ export default function Requests() {
                 <span className="text-xl text-900 font-bold">PEDIDOS</span>
             </div>
             <div className="">
-                {/*<Button
-                    className="m-1"
-                    icon="pi pi-chevron-left"
-                    onClick={() => fetchRequests()}
-                    rounded
-                    raised
-                    size="small"
-                />*/}
                 <Calendar
                     value={date}
                     view="month"
                     dateFormat="mm/yy"
                     inputStyle={{ textAlign: 'center' }}
-                    onChange={(e) => setDate(e.value)}
+                    onChange={(e) => {
+                        setSelected(null);
+                        setDate(e.value);
+                        fetchRequests(e.value);
+                    }}
                     showButtonBar
                     clearButtonClassName="hidden"
                 />
-                {/*<Button
+                <Button
                     className="m-1"
-                    icon="pi pi-chevron-right"
-                    onClick={() => fetchRequests()}
+                    icon="pi pi-filter"
+                    onClick={(e) => overlayPanelRef.current.toggle(e)}
                     rounded
                     raised
-                    size="small"
-                />*/}
+                    size="small" />
+                <OverlayPanel ref={overlayPanelRef}>
+                    <div className="">
+                        <div className="field-checkbox">
+                            <Checkbox inputId="checkCanceled" onChange={e => setShowCanceled(e.checked)} checked={showCanceled} />
+                            <label htmlFor="checkCanceled">Exibir cancelados?</label>
+                        </div>
+                    </div>
+                </OverlayPanel>
                 <Button
                     className="m-1"
                     icon="pi pi-refresh"
                     tooltip="Atualizar Lista"
                     tooltipOptions={{ position: "top" }}
-                    onClick={() => fetchRequests()}
+                    onClick={() => fetchRequests(date)}
                     rounded
                     raised
                     size="small"
@@ -190,6 +176,7 @@ export default function Requests() {
     return (
         <>
             <Toast ref={toastRef} />
+            <ConfirmDialog />
             <div className="content mx-8">
                 <div className="scrollable">
                     <div className="flex">
@@ -256,7 +243,7 @@ export default function Requests() {
                                     disabled={selected === null}
                                     severity="warning"
                                     label="Cancelar"
-                                    onClick={() => cancelRequest()}
+                                    onClick={() => showCancelConfirmationDialog()}
                                     size="small"
                                 />
                                 <Button
@@ -291,9 +278,11 @@ export default function Requests() {
                                 onSelectionChange={(e) => setSelected(e.value)}
                                 onRowDoubleClick={sendToForm}
                                 header={tableHeader}
+                                emptyMessage="Sem resultados para o mês selecionado..."
                             >
                                 <Column header="Data da Entrega" body={row => formatToBRDate(row.due_date)} ></Column>
-                                <Column header="Status" field="status.label" ></Column>
+                                <Column header="Cadastrado em" body={row => formatToBRDateTime(row.created_at)} ></Column>
+                                <Column header="Status" body={row => <Tag severity={row.status.severity} value={row.status.label} />}></Column>
                                 <Column header="Cliente" field="customer.name" ></Column>
                                 <Column header="Telefone" body={row => applyPhoneMask(row.customer.phone)} ></Column>
                                 <Column header="Items" body={itemsColumn} ></Column>

@@ -6,6 +6,8 @@ export const getRequests = async (start, end) => {
         url.searchParams.append("end_date", end.toISOString().split('T')[0]);
     }
 
+    console.log(url.searchParams.values.toString);
+
     return new Promise((resolve, reject) =>
         fetch(url, { method: "GET" })
             .catch(err => {
@@ -54,6 +56,21 @@ export const updateRequest = async payload => {
                     method: "PUT",
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
+                }
+            ).catch(err => reject(err))
+        )
+    );
+};
+
+export const updateRequestStatus = async (id, desiredStatus) => {
+    const url = new URL(`/v1/requests/${id}/status/${desiredStatus}`, "http://localhost:9999");
+
+    return new Promise((resolve, reject) =>
+        resolve(
+            fetch(url,
+                {
+                    method: "PATCH",
+                    headers: { 'Content-Type': 'application/json' }
                 }
             ).catch(err => reject(err))
         )
