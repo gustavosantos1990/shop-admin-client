@@ -4,6 +4,7 @@ export default Yup.object().shape({
     due_date: Yup.date()
         .default(new Date())
         .required('Obrigatório informar data de entrega!'),
+<<<<<<< HEAD
     notes: Yup.string().default(""),
     customer: Yup.object().shape({
         id: Yup.string()
@@ -22,36 +23,39 @@ export default Yup.object().shape({
             .optional(),
         created_at: Yup.string()
             .optional()
-    }).required("Obrigatório informar dados do cliente!"),
-    request_products: Yup.array()
-        .of(Yup.object().shape({
-            unitary_value: Yup.number()
-                .default(0)
-                .required("Obrigatório informar quantidade solicitada do produto")
-                .positive("Valor unitário deve ser positivo!"),
-            amount: Yup.number()
-                .default(0)
-                .required("Obrigatório informar quantidade solicitada do produto")
-                .positive("A quantidade deve ser positiva!"),
-            product: Yup.object().shape({
-                id: Yup.string()
-                    .default("")
-                    .required("Obrigatório selecionar produto"),
-                name: Yup.string()
-                    .default("")
-                    .optional(),
-                price: Yup.number()
-                    .default(0)
-                    .optional(),
-                created_at: Yup.string()
-                    .default("")
-                    .optional(),
-                updated_at: Yup.string()
-                    .default("")
-                    .optional()
-            }).required("Obrigatório selecionar produto")
-        }))
-        .default([])
-        .required("Obrigatório informar listagem de produtos!")
-        .min(1, "Obrigatório informar ao menos um produto!")
+    }).required("Obrigatório informar dados do cliente!")
+    // request_products: Yup.array()
+    //     .of(Yup.object().shape({
+    //         unitary_value: Yup.number()
+    //             .default(0)
+    //             .required("Obrigatório informar quantidade solicitada do produto")
+    //             .positive("Valor unitário deve ser positivo!"),
+    //         amount: Yup.number()
+    //             .default(0)
+    //             .required("Obrigatório informar quantidade solicitada do produto")
+    //             .positive("A quantidade deve ser positiva!"),
+    //         product: Yup.object().shape({
+    //             id: Yup.string()
+    //                 .default("")
+    //                 .required("Obrigatório selecionar produto"),
+    //             name: Yup.string()
+    //                 .default("")
+    //                 .optional(),
+    //             price: Yup.number()
+    //                 .default(0)
+    //                 .optional(),
+    //             created_at: Yup.string()
+    //                 .default("")
+    //                 .optional(),
+    //             updated_at: Yup.string()
+    //                 .default("")
+    //                 .optional()
+    //         }).required("Obrigatório selecionar produto")
+    //     }))
+    //     .default([])
+    //     .required("Obrigatório informar listagem de produtos!")
+    //     .min(1, "Obrigatório informar ao menos um produto!")
+=======
+    notes: Yup.string().optional().default("")
+>>>>>>> c6733e2a8a4622732fd795b7fd3df67f5891a98d
 });

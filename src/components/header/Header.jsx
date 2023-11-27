@@ -24,7 +24,8 @@ export default function Header() {
         },
         {
             label: 'Componentes',
-            icon: 'pi pi-fw pi-th-large'
+            icon: 'pi pi-fw pi-th-large',
+            command: () => navigate({ to: "/componentes", replace: true })
         },
         {
             label: "Agenda",

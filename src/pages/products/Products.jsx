@@ -73,12 +73,6 @@ export default function Products() {
                                 <Checkbox inputId="includeDeletedFilter" onChange={e => setIncludeDeleted(e.checked)} checked={includeDeleted} />
                                 <label htmlFor="includeDeletedFilter">Exibir deletados?</label>
                             </div>
-                            {/*
-                            <div className="field-checkbox">
-                                <Checkbox inputId="includeDeletedFilter" onChange={e => setIncludeDeleted(e.checked)} checked={includeDeleted} />
-                                <label htmlFor="includeDeletedFilter" >Exibir deletados?</label>
-                            </div>
-                            */}
                         </div>
                     </OverlayPanel>
                     <Button icon="pi pi-refresh" onClick={() => fetchProducts()} />
@@ -184,9 +178,35 @@ export default function Products() {
         });
     };
 
+    /****************CALCULATIONS******************/
+
+    const productCostCalc = product => {
+        return product.components?.map(c => c.cost).reduce((prev, val) => prev + val, 0.00);
+    };
+
+    const rawProfitCalc = row => {
+        var cost = productCostCalc(row);
+        return row.price - cost;
+    };
+
+    const rawProfitMarginCalc = row => {
+        var rawProfit = rawProfitCalc(row);
+        var margin = (rawProfit / row.price) * 100;
+        return margin.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
+    };
+    
+    /**********************************************/
+
     const costColumn = row => {
-        var cost = row.components?.map(c => c.cost).reduce((prev, val) => prev + val, 0.00);
-        return formatToBRCurrency(cost, 2, 2);
+        return formatToBRCurrency(productCostCalc(row), 2, 2);
+    };
+
+    const rawProfitColumn = row => {
+        return formatToBRCurrency(rawProfitCalc(row), 2, 2);
+    };
+
+    const rawProfitMarginColumn = row => {
+        return `${rawProfitMarginCalc(row)}%`;
     };
 
     const rowClass = row => {
@@ -253,9 +273,11 @@ export default function Products() {
                     >
                         <Column header="Nome" field="name" style={{ width: '50%' }} ></Column>
                         <Column header="Criado em" body={row => formatToBRDateTime(row.created_at)} ></Column>
-                        {/* <Column header="Deletado em" body={row => formatToBRDateTime(row.deleted_at)} ></Column> */}
+                        <Column header="Deletado em" body={row => row.deleted_at ? formatToBRDateTime(row.deleted_at) : '--'} ></Column>
                         <Column header="Preço" body={row => formatToBRCurrency(row.price, 2, 2)} ></Column>
                         <Column header="Custo" body={costColumn} ></Column>
+                        <Column header="Lucro Bruto" body={rawProfitColumn} ></Column>
+                        <Column header="Margem de Lucro Bruta" body={rawProfitMarginColumn} ></Column>
                     </DataTable>
                 </div>
             </div>

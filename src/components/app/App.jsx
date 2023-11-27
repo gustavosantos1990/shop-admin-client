@@ -5,6 +5,11 @@ import { getRequestByID, getRequests } from "../../services/RequestService";
 import Footer from '../footer/Footer'
 import Header from '../header/Header'
 import { getProducts, getProductByID } from '../../services/ProductService';
+import { getComponents } from '../../services/ComponentService';
+<<<<<<< HEAD
+=======
+import { getMeasures } from "../../services/MeasureService";
+>>>>>>> c6733e2a8a4622732fd795b7fd3df67f5891a98d
 
 export default function App() {
 
@@ -45,9 +50,13 @@ export default function App() {
           }
         },
         {
+          path: "novo",
+          element: () => import("../../pages/requests/NewRequestForm").then(module => <module.default />)
+        },
+        {
           path: ":id",
           element: () => import("../../pages/requests/RequestForm").then(module => <module.default />),
-          loader: async ({params}) => {
+          loader: async ({ params }) => {
             return {
               request: await fetchRequest(params.id),
               products: await fetchProducts()
@@ -81,6 +90,24 @@ export default function App() {
           }
         }
       ]
+    },
+    {
+      path: "componentes",
+      element: () => import("../../pages/components/Components").then(module => <module.default />),
+      loader: async () => {
+        var res = await getComponents();
+        var json = res.status === 204 ? [] : await res.json();
+<<<<<<< HEAD
+        return { components: json };
+=======
+        var measuresRes = await getMeasures();
+        
+        return {
+          components: json,
+          measures: await measuresRes.json()
+        };
+>>>>>>> c6733e2a8a4622732fd795b7fd3df67f5891a98d
+      }
     }
   ];
 
@@ -90,7 +117,7 @@ export default function App() {
     <Router routes={routes} location={location}>
       <Header />
       <Outlet />
-      <Footer />
+      {/*<Footer />*/}
     </Router>
   )
 };

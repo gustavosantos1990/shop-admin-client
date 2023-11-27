@@ -1,5 +1,5 @@
-export const getProductComponents = async id => {
-    const url = new URL(`/v1/products/${id}/components`, "http://localhost:9999");
+export const getRequestProducts = async id => {
+    const url = new URL(`/v1/requests/${id}/products`, "http://localhost:9999");
 
     return new Promise((resolve, reject) =>
         fetch(url, { method: "GET" })
@@ -10,8 +10,8 @@ export const getProductComponents = async id => {
     );
 };
 
-export const saveNewProductComponent = async (productID, payload) => {
-    const url = new URL(`/v1/products/${productID}/components`, "http://localhost:9999");
+export const saveNewRequestProduct = async (requestID, payload) => {
+    const url = new URL(`/v1/requests/${requestID}/products`, "http://localhost:9999");
 
     return new Promise((resolve, reject) =>
         resolve(
@@ -26,8 +26,8 @@ export const saveNewProductComponent = async (productID, payload) => {
     );
 };
 
-export const updateProductComponent = async (productID, componentID, payload) => {
-    const url = new URL(`/v1/products/${productID}/components/${componentID}`, "http://localhost:9999");
+export const updateRequestProduct = async (requestID, productID, payload) => {
+    const url = new URL(`/v1/requests/${requestID}/products/${productID}`, "http://localhost:9999");
 
     return new Promise((resolve, reject) =>
         resolve(
@@ -42,8 +42,8 @@ export const updateProductComponent = async (productID, componentID, payload) =>
     );
 };
 
-export const deleteProductComponent = async (productID, componentID) => {
-    const url = new URL(`/v1/products/${productID}/components/${componentID}`, "http://localhost:9999");
+export const deleteRequestProduct = async (requestID, productID) => {
+    const url = new URL(`/v1/requests/${requestID}/products/${productID}`, "http://localhost:9999");
 
     return new Promise((resolve, reject) =>
         resolve(fetch(url, { method: "DELETE" })

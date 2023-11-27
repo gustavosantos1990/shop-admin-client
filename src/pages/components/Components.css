@@ -1,0 +1,7 @@
+.p-card .p-card-body {
+    padding-bottom: 0px;
+}
+
+.p-datatable {
+    flex-flow: column;
+}
