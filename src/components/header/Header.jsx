@@ -26,11 +26,11 @@ export default function Header() {
             label: 'Componentes',
             icon: 'pi pi-fw pi-th-large',
             command: () => navigate({ to: "/componentes", replace: true })
-        },
+        }/*,
         {
             label: "Agenda",
             icon: "fa-regular fa-calendar",
-            command: () => navigate({ to: "/agenda", replace: true })
+            command: () => navigate({ to: "/agenda", replace: true }),
         },
         {
             label: "Movimentações",
@@ -41,7 +41,7 @@ export default function Header() {
             label: "Compras",
             icon: "fa-solid fa-cart-shopping",
             command: () => navigate({ to: "/agenda", replace: true })
-        }
+        }*/
     ];
 
     useEffect(() => {

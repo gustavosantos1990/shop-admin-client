@@ -235,6 +235,7 @@ export default function Requests() {
                                     disabled={selected === null}
                                     onClick={printRequest}
                                     size="small"
+                                    visible={false}
                                 />
                                 <Button
                                     raised
@@ -263,12 +264,13 @@ export default function Requests() {
                                     label="Deletar"
                                     onClick={() => showDeleteConfirmationDialog()}
                                     size="small"
+                                    visible={false}
                                 />
                                 <Button
                                     raised
                                     icon="pi pi-palette"
                                     className="m-1"
-                                    disabled={selected === null}
+                                    disabled={selected === null || selected.status.order >= 2}
                                     label="Seguir para produção"
                                     onClick={() => showDoingConfirmationDialog()}
                                     size="small"
@@ -277,7 +279,7 @@ export default function Requests() {
                                     raised
                                     icon="pi pi-ban"
                                     className="m-1"
-                                    disabled={selected === null}
+                                    disabled={selected === null || selected.status.order >= 4}
                                     severity="warning"
                                     label="Cancelar"
                                     onClick={() => showCancelConfirmationDialog()}
@@ -291,6 +293,7 @@ export default function Requests() {
                                     disabled={selected === null}
                                     onClick={() => sendToMovimentations()}
                                     size="small"
+                                    visible={false}
                                 />
                                 <Button
                                     raised
@@ -300,6 +303,7 @@ export default function Requests() {
                                     disabled={selected === null}
                                     onClick={() => finishRequest()}
                                     size="small"
+                                    visible={false}
                                 />
                             </div>
                         </div>

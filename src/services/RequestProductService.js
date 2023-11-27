@@ -1,5 +1,5 @@
 export const getRequestProducts = async id => {
-    const url = new URL(`/v1/requests/${id}/products`, "http://localhost:9999");
+    const url = new URL(`/v1/requests/${id}/products`, "http://192.168.1.100:9999");
 
     return new Promise((resolve, reject) =>
         fetch(url, { method: "GET" })
@@ -11,7 +11,7 @@ export const getRequestProducts = async id => {
 };
 
 export const saveNewRequestProduct = async (requestID, payload) => {
-    const url = new URL(`/v1/requests/${requestID}/products`, "http://localhost:9999");
+    const url = new URL(`/v1/requests/${requestID}/products`, "http://192.168.1.100:9999");
 
     return new Promise((resolve, reject) =>
         resolve(
@@ -27,7 +27,7 @@ export const saveNewRequestProduct = async (requestID, payload) => {
 };
 
 export const updateRequestProduct = async (requestID, productID, payload) => {
-    const url = new URL(`/v1/requests/${requestID}/products/${productID}`, "http://localhost:9999");
+    const url = new URL(`/v1/requests/${requestID}/products/${productID}`, "http://192.168.1.100:9999");
 
     return new Promise((resolve, reject) =>
         resolve(
@@ -43,7 +43,7 @@ export const updateRequestProduct = async (requestID, productID, payload) => {
 };
 
 export const deleteRequestProduct = async (requestID, productID) => {
-    const url = new URL(`/v1/requests/${requestID}/products/${productID}`, "http://localhost:9999");
+    const url = new URL(`/v1/requests/${requestID}/products/${productID}`, "http://192.168.1.100:9999");
 
     return new Promise((resolve, reject) =>
         resolve(fetch(url, { method: "DELETE" })
